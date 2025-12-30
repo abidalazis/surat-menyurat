@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= appName ?> - Dashboard</title>
+  
+  <style>
+    /* ================================================================
+     * GLOBAL STYLES
+     * ================================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+    
+    /* ================================================================
+     * TOP NAVIGATION BAR
+     * ================================================================ */
+    .navbar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    
+    .user-details {
+      text-align: right;
+    }
+    
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .user-role {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .btn-logout {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-logout:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    /* ================================================================
+     * TAB NAVIGATION
+     * ================================================================ */
+    .tab-navigation {
+      background: white;
+      padding: 0 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 5px;
+    }
+    
+    .tab-btn {
+      padding: 15px 25px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 15px;
+      color: #666;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .tab-btn:hover {
+      color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+    }
+    
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      font-weight: 600;
+    }
+    
+    /* ================================================================
+     * MAIN CONTENT AREA
+     * ================================================================ */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    
+    .page-header {
+      margin-bottom: 30px;
+    }
+    
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #2c3e50;
+    }
+    
+    .page-subtitle {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+    
+    .section-divider {
+      border: none;
+      border-top: 2px solid #e0e0e0;
+      margin: 30px 0;
+    }
+    
+    /* ================================================================
+     * STATISTICS CARDS
+     * ================================================================ */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .stat-title {
+      font-size: 14px;
+      color: #7f8c8d;
+      font-weight: 500;
+    }
+    
+    .stat-icon {
+      font-size: 28px;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: #95a5a6;
+    }
+    
+    /* ================================================================
+     * NOMOR AGENDA CARD
+     * ================================================================ */
+    .nomor-agenda-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .nomor-agenda-title {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 15px;
+    }
+    
+    .nomor-agenda-value {
+      font-size: 64px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    
+    .nomor-agenda-update {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    
+    /* ================================================================
+     * RECENT SURAT TABLE
+     * ================================================================ */
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    thead {
+      background: #f8f9fa;
+    }
+    
+    thead th {
+      padding: 15px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: #495057;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    tbody tr {
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s ease;
+    }
+    
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    tbody td {
+      padding: 15px 20px;
+      font-size: 14px;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status-success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #95a5a6;
+    }
+    
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+    }
+    
+    /* ================================================================
+     * QUICK ACTIONS
+     * ================================================================ */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .action-btn {
+      background: white;
+      border: 2px solid #e0e0e0;
+      padding: 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .action-btn:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .action-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+    
+    .action-label {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    /* ================================================================
+     * TAB CONTENT
+     * ================================================================ */
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ================================================================
+     * RESPONSIVE
+     * ================================================================ */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 15px;
+      }
+      
+      .navbar {
+        padding: 15px;
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .tab-navigation {
+        padding: 0 15px;
+        overflow-x: auto;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .nomor-agenda-value {
+        font-size: 48px;
+      }
+      
+      .table-container {
+        font-size: 12px;
+      }
+      
+      thead th, tbody td {
+        padding: 10px;
+      }
+      
+      .user-details {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- ================================================================
+       TOP NAVIGATION BAR
+       ================================================================ -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span>🏢</span>
+      <span><?= appName ?></span>
+    </div>
+    
+    <div class="navbar-user">
+      <div class="user-info">
+        <div class="user-avatar">👤</div>
+        <div class="user-details">
+          <div class="user-name"><?= user.namaLengkap ?></div>
+          <div class="user-role"><?= user.bidang ?> - <?= user.role === 'admin' ? 'Administrator' : 'User' ?></div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">Logout</button>
+    </div>
+  </nav>
+  
+  <!-- ================================================================
+       TAB NAVIGATION
+       ================================================================ -->
+  <div class="tab-navigation">
+    <button class="tab-btn active" onclick="switchTab('home')" data-tab="home">
+      📊 Home
+    </button>
+    <button class="tab-btn" onclick="switchTab('input')" data-tab="input">
+      ➕ Input Surat
+    </button>
+    <button class="tab-btn" onclick="switchTab('data')" data-tab="data">
+      📋 Data Surat
+    </button>
+    <button class="tab-btn" onclick="switchTab('laporan')" data-tab="laporan">
+      📈 Laporan
+    </button>
+  </div>
+  
+  <!-- ================================================================
+       MAIN CONTENT AREA
+       ================================================================ -->
+  <div class="container">
+    
+    <!-- ============================================================
+         TAB: HOME (Dashboard)
+         ============================================================ -->
+    <div id="tab-home" class="tab-content active">
+      
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1 class="page-title">Selamat Datang, <?= user.namaLengkap ?>! 👋</h1>
+        <p class="page-subtitle">Bidang: <?= user.bidang ?></p>
+      </div>
+      
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Total Surat</span>
+            <span class="stat-icon">📝</span>
+          </div>
+          <div class="stat-value"><?= dashboardData.totalSurat ?></div>
+          <div class="stat-label">Total keseluruhan</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Bulan Ini</span>
+            <span class="stat-icon">📅</span>
+          </div>
+          <div class="stat-value"><?= dashboardData.suratBulanIni ?></div>
+          <div class="stat-label">Surat bulan ini</div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-title">Hari Ini</span>
+            <span class="stat-icon">⚡</span>
+          </div>
+          <div class="stat-value"><?= dashboardData.suratHariIni ?></div>
+          <div class="stat-label">Surat hari ini</div>
+        </div>
+      </div>
+      
+      <!-- Nomor Agenda Terakhir -->
+      <div class="nomor-agenda-card">
+        <div class="nomor-agenda-title">🔢 NOMOR AGENDA TERAKHIR</div>
+        <div class="nomor-agenda-value"><?= dashboardData.nomorTerakhir ?></div>
+        <div class="nomor-agenda-update">Update: <?= dashboardData.lastUpdate ?></div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <h2 class="section-title">🚀 Quick Actions</h2>
+      <div class="quick-actions">
+        <a href="#" class="action-btn" onclick="switchTab('input'); return false;">
+          <div class="action-icon">➕</div>
+          <div class="action-label">Input Surat</div>
+        </a>
+        <a href="#" class="action-btn" onclick="alert('Fitur Input Batch akan segera hadir!'); return false;">
+          <div class="action-icon">📋</div>
+          <div class="action-label">Input Batch</div>
+        </a>
+        <a href="#" class="action-btn" onclick="switchTab('data'); return false;">
+          <div class="action-icon">📊</div>
+          <div class="action-label">Lihat Semua Data</div>
+        </a>
+      </div>
+      
+      <!-- Recent Surat -->
+      <h2 class="section-title">📝 Surat Terbaru</h2>
+      <div class="card">
+        <div class="table-container">
+          <? if (dashboardData.recentSurat.length > 0) { ?>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Nomor Surat</th>
+                  <th>Perihal</th>
+                  <th>Jenis</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <? for (var i = 0; i < dashboardData.recentSurat.length; i++) { 
+                     var surat = dashboardData.recentSurat[i]; ?>
+                  <tr>
+                    <td><?= surat.tanggal ?></td>
+                    <td><strong><?= surat.nomorSurat ?></strong></td>
+                    <td><?= surat.perihal ?></td>
+                    <td><?= surat.jenis ?></td>
+                    <td><span class="status-badge status-success">✓ Final</span></td>
+                  </tr>
+                <? } ?>
+              </tbody>
+            </table>
+          <? } else { ?>
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <h3>Belum Ada Data</h3>
+              <p>Belum ada surat yang tercatat</p>
+            </div>
+          <? } ?>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- ============================================================
+         TAB: INPUT SURAT
+         ============================================================ -->
+    <div id="tab-input" class="tab-content" 
+         data-session-id="<?= sessionId ?>"
+         data-user-bidang="<?= user.bidang ?>"
+         data-nomor-terakhir="<?= dashboardData.nomorTerakhir ?>">
+      <div class="page-header">
+        <h1 class="page-title">➕ Input Surat Baru</h1>
+        <p class="page-subtitle">Form input surat dari Srikandi atau auto-generate</p>
+      </div>
+      
+      <?!= include('InputSurat') ?>
+    </div>
+    
+    <!-- ============================================================
+         TAB: DATA SURAT
+         ============================================================ -->
+    <div id="tab-data" class="tab-content"
+         data-session-id="<?= sessionId ?>"
+         data-user-role="<?= user.role ?>"
+         data-user-bidang="<?= user.bidang ?>">
+      <?!= include('DataSurat') ?>
+    </div>
+    
+    <!-- ============================================================
+         TAB: LAPORAN (Akan dibuat di file terpisah nanti)
+         ============================================================ -->
+    <div id="tab-laporan" class="tab-content">
+      <div class="page-header">
+        <h1 class="page-title">📈 Laporan & Statistik</h1>
+        <p class="page-subtitle">Analisis dan laporan surat</p>
+      </div>
+      
+      <div class="card" style="padding: 40px; text-align: center;">
+        <div style="font-size: 64px; margin-bottom: 20px;">🚧</div>
+        <h2>Fitur Laporan Sedang Dikembangkan</h2>
+        <p style="color: #7f8c8d; margin-top: 10px;">Fitur ini akan tersedia di update selanjutnya</p>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- ================================================================
+       JAVASCRIPT - Handle Tab Switching & Logout
+       ================================================================ -->
+  <script>
+    // Session ID dari server - make it global so InputSurat can access it
+    const SESSION_ID = '<?= sessionId ?>';
+    window.SESSION_ID = SESSION_ID; // Expose to child frames
+    
+    /**
+     * Switch between tabs
+     * @param {string} tabName - Tab name to switch to
+     */
+    function switchTab(tabName) {
+      // Hide all tab contents
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      // Remove active class from all tab buttons
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach(btn => btn.classList.remove('active'));
+      
+      // Show selected tab
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      // Add active class to clicked tab button
+      const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+      }
+    }
+    
+    /**
+     * Handle logout
+     */
+    function handleLogout() {
+      if (confirm('Apakah Anda yakin ingin logout?')) {
+        // Get base URL (remove any query parameters)
+        const baseUrl = window.location.origin + window.location.pathname;
+        
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('action', 'logout');
+        formData.append('session', SESSION_ID);
+        
+        // Submit logout request
+        fetch(baseUrl, {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          // Check if response is JSON
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            return response.json();
+          } else {
+            // If not JSON, just redirect to login
+            window.location.href = baseUrl;
+            return null;
+          }
+        })
+        .then(data => {
+          if (data && data.success) {
+            window.location.href = data.redirectUrl;
+          } else if (data === null) {
+            // Already redirected
+          } else {
+            // Fallback: just go to base URL
+            window.location.href = baseUrl;
+          }
+        })
+        .catch(error => {
+          console.error('Logout error:', error);
+          // Fallback: redirect anyway
+          window.location.href = baseUrl;
+        });
+      }
+    }
+    
+    /**
+     * Auto-refresh session activity every 5 minutes
+     */
+    setInterval(() => {
+      // Ping server to keep session alive
+      fetch(window.location.href, {
+        method: 'GET',
+        cache: 'no-cache'
+      }).catch(err => console.error('Session refresh error:', err));
+    }, 5 * 60 * 1000); // 5 minutes
+  </script>
+  
+</body>
+</html>

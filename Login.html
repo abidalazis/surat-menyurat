@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><?= appName ?> - Login</title>
+  
+  <style>
+    /* ================================================================
+     * GLOBAL STYLES
+     * ================================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    /* ================================================================
+     * LOGIN CONTAINER
+     * ================================================================ */
+    .login-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      max-width: 400px;
+      width: 100%;
+      animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* ================================================================
+     * HEADER
+     * ================================================================ */
+    .login-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    
+    .login-header h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    
+    .login-header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .icon-office {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    
+    /* ================================================================
+     * FORM STYLES
+     * ================================================================ */
+    .login-form {
+      padding: 40px 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+    
+    .form-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group input::placeholder {
+      color: #999;
+    }
+    
+    /* ================================================================
+     * CHECKBOX & REMEMBER ME
+     * ================================================================ */
+    .remember-me {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .remember-me input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+    }
+    
+    .remember-me label {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+      font-weight: normal;
+    }
+    
+    /* ================================================================
+     * BUTTON STYLES
+     * ================================================================ */
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    
+    .btn-login:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    /* ================================================================
+     * LOADING SPINNER
+     * ================================================================ */
+    .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .btn-login.loading .btn-text {
+      display: none;
+    }
+    
+    .btn-login.loading .spinner {
+      display: block;
+    }
+    
+    /* ================================================================
+     * ALERT MESSAGES
+     * ================================================================ */
+    .alert {
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .alert.show {
+      display: block;
+    }
+    
+    .alert-error {
+      background: #fee;
+      color: #c33;
+      border: 1px solid #fcc;
+    }
+    
+    .alert-success {
+      background: #efe;
+      color: #3c3;
+      border: 1px solid #cfc;
+    }
+    
+    /* ================================================================
+     * FOOTER
+     * ================================================================ */
+    .login-footer {
+      text-align: center;
+      padding: 20px;
+      color: #999;
+      font-size: 12px;
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    /* ================================================================
+     * RESPONSIVE
+     * ================================================================ */
+    @media (max-width: 480px) {
+      .login-container {
+        border-radius: 0;
+      }
+      
+      .login-header {
+        padding: 30px 20px;
+      }
+      
+      .login-form {
+        padding: 30px 20px;
+      }
+      
+      .login-header h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- ================================================================
+       LOGIN CONTAINER
+       ================================================================ -->
+  <div class="login-container">
+    
+    <!-- Header dengan logo dan judul -->
+    <div class="login-header">
+      <div class="icon-office">🏢</div>
+      <h1><?= appName ?></h1>
+      <p>Silakan login untuk melanjutkan</p>
+    </div>
+    
+    <!-- Form Login -->
+    <div class="login-form">
+      
+      <!-- Alert message (hidden by default) -->
+      <div id="alert" class="alert"></div>
+      
+      <!-- Login Form -->
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        
+        <!-- Username -->
+        <div class="form-group">
+          <label for="username">Username / Email</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Masukkan username"
+            required
+            autocomplete="username"
+          >
+        </div>
+        
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Masukkan password"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+        
+        <!-- Remember Me -->
+        <div class="remember-me">
+          <input type="checkbox" id="rememberMe" name="rememberMe">
+          <label for="rememberMe">Ingat saya</label>
+        </div>
+        
+        <!-- Submit Button -->
+        <button type="submit" class="btn-login" id="btnLogin">
+          <span class="btn-text">LOGIN</span>
+          <div class="spinner"></div>
+        </button>
+        
+      </form>
+      
+    </div>
+    
+    <!-- Footer -->
+    <div class="login-footer">
+      © 2025 - Sekretariat Kantor
+    </div>
+    
+  </div>
+  
+  <!-- ================================================================
+       JAVASCRIPT - Handle Login
+       ================================================================ -->
+  <script>
+    /**
+     * Handle form login submission
+     * @param {Event} e - Form submit event
+     */
+    function handleLogin(e) {
+      e.preventDefault();
+      
+      // Get form data
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      
+      // Validasi
+      if (!username || !password) {
+        showAlert('Username dan password harus diisi', 'error');
+        return;
+      }
+      
+      // Show loading
+      setLoading(true);
+      hideAlert();
+      
+      // Method 1: Try using google.script.run (for Web App in Apps Script environment)
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        console.log('Using google.script.run method');
+        
+        google.script.run
+          .withSuccessHandler(function(response) {
+            setLoading(false);
+            
+            if (response.success) {
+              showAlert(response.message, 'success');
+              setTimeout(() => {
+                window.location.href = response.redirectUrl;
+              }, 1000);
+            } else {
+              showAlert(response.message, 'error');
+            }
+          })
+          .withFailureHandler(function(error) {
+            setLoading(false);
+            showAlert('Error: ' + error.message, 'error');
+            console.error('Login error:', error);
+          })
+          .processLogin(username, password);
+          
+      } else {
+        // Method 2: Fallback to fetch with proper URL construction
+        console.log('Using fetch method');
+        
+        // Get current URL and construct proper POST URL
+        const currentUrl = window.location.href;
+        const baseUrl = currentUrl.split('?')[0];
+        
+        // Create URL-encoded form data
+        const params = new URLSearchParams();
+        params.append('action', 'login');
+        params.append('username', username);
+        params.append('password', password);
+        
+        fetch(baseUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: params.toString(),
+          redirect: 'follow'
+        })
+        .then(response => {
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          
+          // Try to get response as text first
+          return response.text();
+        })
+        .then(text => {
+          console.log('Response text:', text);
+          
+          // Try to parse as JSON
+          try {
+            const data = JSON.parse(text);
+            setLoading(false);
+            
+            if (data.success) {
+              showAlert(data.message, 'success');
+              setTimeout(() => {
+                window.location.href = data.redirectUrl;
+              }, 1000);
+            } else {
+              showAlert(data.message, 'error');
+            }
+          } catch (e) {
+            setLoading(false);
+            console.error('Failed to parse JSON:', e);
+            showAlert('Server error: Response bukan JSON. Cek console untuk detail.', 'error');
+          }
+        })
+        .catch(error => {
+          setLoading(false);
+          showAlert('Network error: ' + error.message, 'error');
+          console.error('Fetch error:', error);
+        });
+      }
+    }
+    
+    /**
+     * Show/hide loading state
+     * @param {boolean} isLoading - Loading state
+     */
+    function setLoading(isLoading) {
+      const btn = document.getElementById('btnLogin');
+      const inputs = document.querySelectorAll('input');
+      
+      if (isLoading) {
+        btn.classList.add('loading');
+        btn.disabled = true;
+        inputs.forEach(input => input.disabled = true);
+      } else {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        inputs.forEach(input => input.disabled = false);
+      }
+    }
+    
+    /**
+     * Show alert message
+     * @param {string} message - Alert message
+     * @param {string} type - Alert type (success/error)
+     */
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = 'alert alert-' + type + ' show';
+    }
+    
+    /**
+     * Hide alert message
+     */
+    function hideAlert() {
+      const alert = document.getElementById('alert');
+      alert.className = 'alert';
+    }
+    
+    /**
+     * Load saved username if "Remember Me" was checked
+     */
+    window.onload = function() {
+      const savedUsername = localStorage.getItem('rememberedUsername');
+      if (savedUsername) {
+        document.getElementById('username').value = savedUsername;
+        document.getElementById('rememberMe').checked = true;
+      }
+    };
+    
+    /**
+     * Save username to localStorage if "Remember Me" is checked
+     */
+    document.getElementById('rememberMe').addEventListener('change', function() {
+      if (this.checked) {
+        const username = document.getElementById('username').value;
+        if (username) {
+          localStorage.setItem('rememberedUsername', username);
+        }
+      } else {
+        localStorage.removeItem('rememberedUsername');
+      }
+    });
+  </script>
+  
+</body>
+</html>
