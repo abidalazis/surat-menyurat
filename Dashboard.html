@@ -651,6 +651,11 @@
       if (activeBtn) {
         activeBtn.classList.add('active');
       }
+      
+      // Auto-load data if switching to data tab
+      if (tabName === 'data' && typeof window.loadDataSurat === 'function') {
+        window.loadDataSurat();
+      }
     }
     
     /**
@@ -658,6 +663,11 @@
      */
     function handleLogout() {
       if (confirm('Apakah Anda yakin ingin logout?')) {
+        // Clear local storage IMMEDIATELY
+        localStorage.removeItem('session_id');
+        localStorage.removeItem('rememberedUsername');
+        console.log('Local storage cleared');
+        
         // Get base URL (remove any query parameters)
         const baseUrl = window.location.origin + window.location.pathname;
         

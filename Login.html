@@ -371,8 +371,19 @@
           .withSuccessHandler(function(response) {
             setLoading(false);
             
+            console.log('Login response received:', response);
             if (response.success) {
               showAlert(response.message, 'success');
+              
+              // Save session ID
+              console.log('Session ID from server:', response.sessionId);
+              if (response.sessionId) {
+                localStorage.setItem('session_id', response.sessionId);
+                console.log('Session ID saved to localStorage:', localStorage.getItem('session_id'));
+              } else {
+                console.error('CRITICAL: Session ID missing in response!');
+              }
+              
               setTimeout(() => {
                 window.location.href = response.redirectUrl;
               }, 1000);
@@ -426,6 +437,12 @@
             
             if (data.success) {
               showAlert(data.message, 'success');
+              
+              // Save session ID
+              if (data.sessionId) {
+                localStorage.setItem('session_id', data.sessionId);
+              }
+              
               setTimeout(() => {
                 window.location.href = data.redirectUrl;
               }, 1000);
@@ -487,13 +504,61 @@
     /**
      * Load saved username if "Remember Me" was checked
      */
-    window.onload = function() {
+    /**
+     * Load saved username and Check for auto-login
+     */
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM Loaded. Checking local storage...');
+      
+      // 1. Load saved username
       const savedUsername = localStorage.getItem('rememberedUsername');
       if (savedUsername) {
         document.getElementById('username').value = savedUsername;
         document.getElementById('rememberMe').checked = true;
       }
-    };
+      
+      // 2. Check for auto-login (saved session)
+      const savedSessionId = localStorage.getItem('session_id');
+      console.log('Saved Session ID:', savedSessionId ? 'FOUND' : 'NOT FOUND');
+      
+      if (savedSessionId) {
+        console.log('Initiating auto-login check...');
+        setLoading(true);
+        
+        // Hide form while checking
+        document.querySelector('.login-form').style.opacity = '0.5';
+        
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+           google.script.run
+            .withSuccessHandler(function(result) {
+              console.log('Session check result:', result);
+              if (result && result.valid) {
+                console.log('Session valid! Redirecting...');
+                showAlert('Login otomatis...', 'success');
+                setTimeout(() => {
+                  window.location.href = result.redirectUrl;
+                }, 500);
+              } else {
+                console.log('Session invalid');
+                localStorage.removeItem('session_id'); // Clear invalid session
+                setLoading(false);
+                document.querySelector('.login-form').style.opacity = '1';
+                showAlert('Sesi habis, silakan login kembali', 'error');
+              }
+            })
+            .withFailureHandler(function(error) {
+              console.error('Session check failed:', error);
+              setLoading(false);
+              document.querySelector('.login-form').style.opacity = '1';
+            })
+            .checkSessionValidity(savedSessionId);
+        } else {
+          console.log('Not in Apps Script environment (auto-login skipped)');
+          setLoading(false);
+          document.querySelector('.login-form').style.opacity = '1';
+        }
+      }
+    });
     
     /**
      * Save username to localStorage if "Remember Me" is checked

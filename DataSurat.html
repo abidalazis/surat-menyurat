@@ -147,11 +147,7 @@
     }
     
     function loadDataSurat() {
-      if (dataLoaded) {
-        console.log('Data already loaded');
-        return;
-      }
-      
+      // Always load data when this function is called
       console.log('🚀 Loading data...');
       console.log('Calling getSuratData with:', { sessionId: sessionId.substring(0,20)+'...', userRole, userBidang });
       
@@ -224,7 +220,15 @@
     window.confirmDelete = function(id, nomor) {
       if (!confirm('Hapus surat: ' + nomor + '?')) return;
       google.script.run
-        .withSuccessHandler(function(r) { if (r && r.success) { alert(r.message); location.reload(); } else alert(r ? r.message : 'Gagal'); })
+        .withSuccessHandler(function(r) { 
+          if (r && r.success) { 
+            alert(r.message); 
+            // Reload data without refreshing page
+            loadDataSurat(); 
+          } else { 
+            alert(r ? r.message : 'Gagal'); 
+          } 
+        })
         .withFailureHandler(function(e) { alert('Error: ' + e.message); })
         .deleteSurat(id, sessionId);
     };

@@ -317,7 +317,8 @@ function handleLogin(e) {
           return ContentService.createTextOutput(JSON.stringify({
             success: true,
             message: 'Login berhasil',
-            redirectUrl: redirectUrl
+            redirectUrl: redirectUrl,
+            sessionId: sessionId
           })).setMimeType(ContentService.MimeType.JSON);
         } else {
           Logger.log('Login failed: Invalid password');
@@ -390,6 +391,26 @@ function getSessionById(sessionId) {
   }
   
   return null;
+}
+
+/**
+ * Cek apakah session masih valid (Api for client-side)
+ * @param {string} sessionId - Session ID
+ * @return {Object} Result {valid: boolean, redirectUrl: string}
+ */
+function checkSessionValidity(sessionId) {
+  const session = getSessionById(sessionId);
+  const isValid = session && isSessionValid(session);
+  
+  if (isValid) {
+    const webAppUrl = ScriptApp.getService().getUrl();
+    return {
+      valid: true,
+      redirectUrl: webAppUrl + '?session=' + sessionId
+    };
+  }
+  
+  return { valid: false };
 }
 
 /**
@@ -696,7 +717,8 @@ function processLogin(username, password) {
           return {
             success: true,
             message: 'Login berhasil',
-            redirectUrl: redirectUrl
+            redirectUrl: redirectUrl,
+            sessionId: sessionId
           };
         }
       }
@@ -1004,13 +1026,13 @@ function getSuratData(sessionId, userRole, userBidang) {
       
       result.push({
         id: row[0] || '',
-        timestamp: row[1] || '',
+        timestamp: row[1] instanceof Date ? row[1].toISOString() : String(row[1] || ''),
         nomorAgenda: row[2] || '',
         nomor: row[3] || '',
         sumber: row[4] || '',
         kodeDepan: row[5] || '',
         kodeBelakang: row[6] || '',
-        tanggal: row[7] || '',
+        tanggal: row[7] instanceof Date ? row[7].toISOString() : String(row[7] || ''),
         bidang: row[8] || '',
         perihal: row[9] || '',
         jenis: row[10] || '',
