@@ -912,7 +912,7 @@ function submitSurat(formData) {
 
 
 /**
- * Get surat data for table
+ * Get surat data for table - VERSI DEBUG
  * @param {string} sessionId - Session ID
  * @param {string} userRole - User role (admin/user)
  * @param {string} userBidang - User bidang
@@ -920,60 +920,114 @@ function submitSurat(formData) {
  */
 function getSuratData(sessionId, userRole, userBidang) {
   try {
-    Logger.log('=== getSuratData START ===');
-    Logger.log('Session ID: ' + sessionId);
-    Logger.log('User Role: ' + userRole);
-    Logger.log('User Bidang: ' + userBidang);
+    Logger.log('=== getSuratData START (DEBUG) ===');
+    Logger.log('Params received:');
+    Logger.log('  sessionId: ' + sessionId);
+    Logger.log('  userRole: ' + userRole);
+    Logger.log('  userBidang: ' + userBidang);
     
-    // Validasi session
+    // STEP 1: Validasi session
+    Logger.log('STEP 1: Validating session...');
     const session = getSessionById(sessionId);
-    if (!session || !isSessionValid(session)) {
+    
+    if (!session) {
+      Logger.log('ERROR: Session not found!');
       return {
         success: false,
-        message: 'Session tidak valid'
+        message: 'Session tidak ditemukan. Session ID: ' + sessionId
       };
     }
     
-    // Get data surat
-    const sheet = getSheet(CONFIG.SHEET_DATA_SURAT);
+    Logger.log('Session found: ' + JSON.stringify(session));
+    
+    if (!isSessionValid(session)) {
+      Logger.log('ERROR: Session expired!');
+      return {
+        success: false,
+        message: 'Session expired. Please login again.'
+      };
+    }
+    
+    Logger.log('Session is valid ✓');
+    
+    // STEP 2: Get spreadsheet
+    Logger.log('STEP 2: Getting spreadsheet...');
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    Logger.log('Spreadsheet ID: ' + ss.getId());
+    Logger.log('Spreadsheet Name: ' + ss.getName());
+    
+    // STEP 3: Get sheet
+    Logger.log('STEP 3: Getting DATA_SURAT sheet...');
+    const sheet = ss.getSheetByName('DATA_SURAT');
+    
+    if (!sheet) {
+      Logger.log('ERROR: Sheet DATA_SURAT not found!');
+      Logger.log('Available sheets:');
+      ss.getSheets().forEach(function(s) {
+        Logger.log('  - ' + s.getName());
+      });
+      return {
+        success: false,
+        message: 'Sheet DATA_SURAT tidak ditemukan. Jalankan quickSetup() terlebih dahulu.'
+      };
+    }
+    
+    Logger.log('Sheet found: ' + sheet.getName());
+    
+    // STEP 4: Get data
+    Logger.log('STEP 4: Reading data from sheet...');
     const data = sheet.getDataRange().getValues();
+    Logger.log('Total rows (including header): ' + data.length);
     
     if (data.length <= 1) {
+      Logger.log('No data found (only header row)');
       return {
         success: true,
         data: []
       };
     }
     
-    // Parse data
+    // STEP 5: Parse data
+    Logger.log('STEP 5: Parsing data...');
     const result = [];
+    
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       
+      // Log first row for debugging
+      if (i === 1) {
+        Logger.log('First data row (as sample):');
+        Logger.log('  ID: ' + row[0]);
+        Logger.log('  Nomor: ' + row[3]);
+        Logger.log('  Bidang: ' + row[8]);
+      }
+      
       // Filter berdasarkan role
       if (userRole !== 'admin' && row[8] !== userBidang) {
-        continue; // Skip data bidang lain jika bukan admin
+        Logger.log('Skipping row ' + i + ' (bidang: ' + row[8] + ', user bidang: ' + userBidang + ')');
+        continue;
       }
       
       result.push({
-        id: row[0],
-        timestamp: row[1],
-        nomorAgenda: row[2],
-        nomor: row[3],
-        sumber: row[4],
-        kodeDepan: row[5],
-        kodeBelakang: row[6],
-        tanggal: row[7],
-        bidang: row[8],
-        perihal: row[9],
-        jenis: row[10],
-        tujuan: row[11],
-        keterangan: row[12],
-        createdBy: row[13]
+        id: row[0] || '',
+        timestamp: row[1] || '',
+        nomorAgenda: row[2] || '',
+        nomor: row[3] || '',
+        sumber: row[4] || '',
+        kodeDepan: row[5] || '',
+        kodeBelakang: row[6] || '',
+        tanggal: row[7] || '',
+        bidang: row[8] || '',
+        perihal: row[9] || '',
+        jenis: row[10] || '',
+        tujuan: row[11] || '',
+        keterangan: row[12] || '',
+        createdBy: row[13] || ''
       });
     }
     
-    Logger.log('Found ' + result.length + ' records');
+    Logger.log('STEP 6: Returning results');
+    Logger.log('Total records found: ' + result.length);
     Logger.log('=== getSuratData SUCCESS ===');
     
     return {
@@ -983,11 +1037,13 @@ function getSuratData(sessionId, userRole, userBidang) {
     
   } catch (error) {
     Logger.log('=== getSuratData ERROR ===');
-    Logger.log('Error: ' + error.message);
+    Logger.log('Error type: ' + error.name);
+    Logger.log('Error message: ' + error.message);
+    Logger.log('Error stack: ' + error.stack);
     
     return {
       success: false,
-      message: 'Terjadi kesalahan: ' + error.message
+      message: 'Error: ' + error.message + ' (Cek Executions log untuk detail)'
     };
   }
 }
@@ -1056,191 +1112,6 @@ function deleteSurat(suratId, sessionId) {
   } catch (error) {
     Logger.log('=== deleteSurat ERROR ===');
     Logger.log('Error: ' + error.message);
-    
-    return {
-      success: false,
-      message: 'Terjadi kesalahan: ' + error.message
-    };
-  }
-}
-  try {
-    Logger.log('=== submitSurat START ===');
-    Logger.log('Mode: ' + formData.mode);
-    Logger.log('Bidang: ' + formData.bidang);
-    Logger.log('Session ID: ' + formData.sessionId);
-    
-    // Validasi session
-    const session = getSessionById(formData.sessionId);
-    if (!session) {
-      Logger.log('ERROR: Session not found');
-      return {
-        success: false,
-        message: 'Session tidak ditemukan. Silakan login kembali.'
-      };
-    }
-    
-    if (!isSessionValid(session)) {
-      Logger.log('ERROR: Session expired');
-      return {
-        success: false,
-        message: 'Session expired. Silakan login kembali.'
-      };
-    }
-    
-    Logger.log('Session valid. User ID: ' + session.userId);
-    
-    const user = getUserById(session.userId);
-    if (!user) {
-      Logger.log('ERROR: User not found');
-      return {
-        success: false,
-        message: 'User tidak ditemukan.'
-      };
-    }
-    
-    Logger.log('User found: ' + user.username);
-    
-    // Generate nomor atau gunakan nomor dari Srikandi
-    let nomorSuratLengkap = '';
-    let nomorAgenda = '';
-    let kodeDepan = '';
-    let kodeBelakang = '';
-    const currentYear = new Date().getFullYear();
-    
-    if (formData.mode === 'srikandi') {
-      // Mode Srikandi: gunakan nomor yang sudah ada
-      nomorSuratLengkap = formData.nomorLengkap;
-      
-      if (!nomorSuratLengkap) {
-        Logger.log('ERROR: Nomor lengkap kosong');
-        return {
-          success: false,
-          message: 'Nomor surat lengkap harus diisi!'
-        };
-      }
-      
-      // Extract parts dari nomor lengkap
-      const parts = nomorSuratLengkap.split('/');
-      if (parts.length >= 3) {
-        kodeDepan = parts[0] || '';
-        nomorAgenda = parts[1] || '';
-        kodeBelakang = parts[2] || CONFIG.DEFAULT_KODE_BELAKANG;
-      } else {
-        Logger.log('ERROR: Format nomor tidak valid');
-        return {
-          success: false,
-          message: 'Format nomor surat tidak valid. Contoh: 100.1.2/046/405.29.05/2025'
-        };
-      }
-      
-      Logger.log('Mode Srikandi - Nomor: ' + nomorSuratLengkap);
-      
-    } else {
-      // Mode Manual: auto-generate nomor agenda
-      kodeDepan = formData.kodeDepan;
-      kodeBelakang = formData.kodeBelakang || CONFIG.DEFAULT_KODE_BELAKANG;
-      
-      if (!kodeDepan) {
-        Logger.log('ERROR: Kode depan kosong');
-        return {
-          success: false,
-          message: 'Kode klasifikasi depan harus diisi!'
-        };
-      }
-      
-      Logger.log('Getting counter...');
-      
-      // Get nomor terakhir dari counter
-      const counterSheet = getSheet(CONFIG.SHEET_COUNTER);
-      const counterData = counterSheet.getRange(2, 1, 1, 3).getValues()[0];
-      const tahunCounter = counterData[0];
-      let nomorTerakhir = counterData[1] || 0;
-      
-      Logger.log('Counter - Tahun: ' + tahunCounter + ', Nomor: ' + nomorTerakhir);
-      
-      // Reset counter jika tahun berubah
-      if (tahunCounter != currentYear) {
-        Logger.log('Reset counter for new year: ' + currentYear);
-        nomorTerakhir = 0;
-        counterSheet.getRange(2, 1).setValue(currentYear);
-      }
-      
-      // Increment nomor
-      nomorTerakhir = parseInt(nomorTerakhir) + 1;
-      nomorAgenda = String(nomorTerakhir).padStart(3, '0');
-      
-      Logger.log('New nomor agenda: ' + nomorAgenda);
-      
-      // Update counter
-      counterSheet.getRange(2, 2).setValue(nomorTerakhir);
-      counterSheet.getRange(2, 3).setValue(new Date());
-      
-      // Generate nomor lengkap
-      nomorSuratLengkap = `${kodeDepan}/${nomorAgenda}/${kodeBelakang}/${currentYear}`;
-      
-      Logger.log('Mode Manual - Generated: ' + nomorSuratLengkap);
-    }
-    
-    Logger.log('Checking for duplicates...');
-    
-    // Validasi nomor tidak duplikat
-    const dataSheet = getSheet(CONFIG.SHEET_DATA_SURAT);
-    const existingData = dataSheet.getDataRange().getValues();
-    
-    for (let i = 1; i < existingData.length; i++) {
-      if (existingData[i][3] === nomorSuratLengkap) {
-        Logger.log('ERROR: Duplicate nomor found');
-        return {
-          success: false,
-          message: 'Nomor surat ' + nomorSuratLengkap + ' sudah ada dalam database!'
-        };
-      }
-    }
-    
-    Logger.log('No duplicates. Saving data...');
-    
-    // Simpan data
-    const id = generateId('SURAT');
-    const timestamp = new Date();
-    const tanggalSurat = formData.tanggalSurat ? new Date(formData.tanggalSurat) : new Date();
-    
-    dataSheet.appendRow([
-      id,
-      timestamp,
-      nomorAgenda,
-      nomorSuratLengkap,
-      formData.mode === 'srikandi' ? 'Srikandi' : 'Manual',
-      kodeDepan,
-      kodeBelakang,
-      tanggalSurat,
-      formData.bidang || user.bidang,
-      formData.perihal || '',
-      formData.jenisSurat || '',
-      formData.tujuan || '',
-      formData.keterangan || '',
-      user.username,
-      '',
-      ''
-    ]);
-    
-    Logger.log('Data saved successfully');
-    
-    // Log aktivitas
-    logActivity(user.userId, user.username, 'INPUT_SURAT', 'Input surat: ' + nomorSuratLengkap);
-    
-    Logger.log('=== submitSurat SUCCESS ===');
-    
-    return {
-      success: true,
-      message: 'Surat berhasil disimpan! Nomor: ' + nomorSuratLengkap,
-      nomorAgenda: parseInt(nomorAgenda) || 0,
-      nomorSurat: nomorSuratLengkap
-    };
-    
-  } catch (error) {
-    Logger.log('=== submitSurat ERROR ===');
-    Logger.log('Error message: ' + error.message);
-    Logger.log('Error stack: ' + error.stack);
     
     return {
       success: false,
@@ -1342,5 +1213,68 @@ function quickSetup() {
   } catch (error) {
     Logger.log('❌ ERROR: ' + error.toString());
     Logger.log('Detail: ' + error.stack);
+  }
+}
+
+
+// ================================================================
+// HELPER FUNCTION FOR DASHBOARD - Server-side data processing
+// ================================================================
+
+/**
+ * Get surat data untuk ditampilkan di dashboard (server-side)
+ * Dipanggil langsung dari template, bukan via google.script.run
+ * @param {string} sessionId - Session ID
+ * @param {string} userRole - User role
+ * @param {string} userBidang - User bidang
+ * @return {Array} Array of surat objects
+ */
+function getSuratDataForDashboard(sessionId, userRole, userBidang) {
+  try {
+    Logger.log('=== getSuratDataForDashboard START ===');
+    
+    // Get data surat
+    const sheet = getSheet(CONFIG.SHEET_DATA_SURAT);
+    const data = sheet.getDataRange().getValues();
+    
+    if (data.length <= 1) {
+      return [];
+    }
+    
+    // Parse data
+    const result = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      
+      // Filter berdasarkan role
+      if (userRole !== 'admin' && row[8] !== userBidang) {
+        continue; // Skip data bidang lain jika bukan admin
+      }
+      
+      result.push({
+        id: row[0],
+        timestamp: row[1],
+        nomorAgenda: row[2],
+        nomor: row[3],
+        sumber: row[4],
+        kodeDepan: row[5],
+        kodeBelakang: row[6],
+        tanggal: row[7],
+        bidang: row[8],
+        perihal: row[9],
+        jenis: row[10],
+        tujuan: row[11],
+        keterangan: row[12],
+        createdBy: row[13]
+      });
+    }
+    
+    Logger.log('Found ' + result.length + ' records for dashboard');
+    return result;
+    
+  } catch (error) {
+    Logger.log('=== getSuratDataForDashboard ERROR ===');
+    Logger.log('Error: ' + error.message);
+    return [];
   }
 }
