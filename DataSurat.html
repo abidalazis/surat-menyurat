@@ -1,303 +1,64 @@
 <style>
-    /* ================================================================
-     * DATA SURAT STYLES
-     * ================================================================ */
-    .data-surat-container {
-      padding: 0;
-    }
-    
-    .page-header {
-      margin-bottom: 25px;
-    }
-    
-    .page-title {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: #2c3e50;
-    }
-    
-    .page-subtitle {
-      color: #7f8c8d;
-      font-size: 14px;
-    }
-    
-    .filter-section {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-    
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    
-    .filter-group label {
-      font-size: 13px;
-      color: #555;
-      font-weight: 500;
-    }
-    
-    .filter-group input,
-    .filter-group select {
-      padding: 10px 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      outline: none;
-    }
-    
-    .filter-group input:focus,
-    .filter-group select:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    .filter-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-    
-    .btn-data {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .btn-data.btn-secondary {
-      background: white;
-      color: #667eea;
-      border: 2px solid #667eea;
-    }
-    
-    .btn-data.btn-secondary:hover {
-      background: rgba(102, 126, 234, 0.1);
-    }
-    
-    .btn-data.btn-success {
-      background: #28a745;
-      color: white;
-    }
-    
-    .btn-data.btn-warning {
-      background: #ffc107;
-      color: #333;
-    }
-    
-    .btn-data.btn-danger {
-      background: #dc3545;
-      color: white;
-    }
-    
+    .data-surat-container { padding: 0; }
+    .page-header { margin-bottom: 25px; }
+    .page-title { font-size: 24px; font-weight: 600; margin-bottom: 5px; color: #2c3e50; }
+    .page-subtitle { color: #7f8c8d; font-size: 14px; }
+    .filter-section { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label { font-size: 13px; color: #555; font-weight: 500; }
+    .filter-group input, .filter-group select { padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; outline: none; }
+    .filter-group input:focus, .filter-group select:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+    .filter-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-data { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-data.btn-secondary { background: white; color: #667eea; border: 2px solid #667eea; }
+    .btn-data.btn-secondary:hover { background: rgba(102, 126, 234, 0.1); }
+    .btn-data.btn-success { background: #28a745; color: white; }
+    .btn-data.btn-warning { background: #ffc107; color: #333; }
     .btn-data.btn-success:hover { background: #218838; }
     .btn-data.btn-warning:hover { background: #e0a800; }
-    .btn-data.btn-danger:hover { background: #c82333; }
-    
-    .table-section {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-    
-    .table-header {
-      padding: 20px;
-      border-bottom: 1px solid #e0e0e0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .table-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-    
-    .result-count {
-      font-size: 14px;
-      color: #7f8c8d;
-    }
-    
-    .data-table-container {
-      overflow-x: auto;
-    }
-    
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 900px;
-    }
-    
-    .data-table thead {
-      background: #f8f9fa;
-    }
-    
-    .data-table thead th {
-      padding: 15px 12px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 13px;
-      color: #495057;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 2px solid #dee2e6;
-    }
-    
-    .data-table tbody tr {
-      border-bottom: 1px solid #f0f0f0;
-      transition: all 0.2s ease;
-    }
-    
-    .data-table tbody tr:hover {
-      background: #f8f9fa;
-    }
-    
-    .data-table tbody td {
-      padding: 15px 12px;
-      font-size: 14px;
-      color: #333;
-    }
-    
-    .badge-srikandi {
-      background: #e3f2fd;
-      color: #1976d2;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .badge-manual {
-      background: #f3e5f5;
-      color: #7b1fa2;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .badge-masuk {
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .badge-keluar {
-      background: #fff3e0;
-      color: #e65100;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .action-buttons {
-      display: flex;
-      gap: 5px;
-    }
-    
-    .btn-action {
-      padding: 6px 12px;
-      font-size: 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .btn-edit {
-      background: #17a2b8;
-      color: white;
-    }
-    
-    .btn-delete {
-      background: #dc3545;
-      color: white;
-    }
-    
-    .btn-action:hover {
-      transform: scale(1.05);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    
-    .empty-state-data {
-      padding: 60px 20px;
-      text-align: center;
-      color: #95a5a6;
-    }
-    
-    .empty-icon {
-      font-size: 64px;
-      margin-bottom: 15px;
-    }
-    
-    .alert-data {
-      padding: 15px 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    
-    .alert-data.show {
-      display: block;
-    }
-    
-    .alert-data.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    
-    .alert-data.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
+    .table-section { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+    .table-header { padding: 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+    .table-title { font-size: 16px; font-weight: 600; color: #2c3e50; }
+    .result-count { font-size: 14px; color: #7f8c8d; }
+    .data-table-container { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    .data-table thead { background: #f8f9fa; }
+    .data-table thead th { padding: 15px 12px; text-align: left; font-weight: 600; font-size: 13px; color: #495057; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #dee2e6; }
+    .data-table tbody tr { border-bottom: 1px solid #f0f0f0; transition: all 0.2s ease; }
+    .data-table tbody tr:hover { background: #f8f9fa; }
+    .data-table tbody td { padding: 15px 12px; font-size: 14px; color: #333; }
+    .badge-srikandi { background: #e3f2fd; color: #1976d2; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge-manual { background: #f3e5f5; color: #7b1fa2; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge-masuk { background: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge-keluar { background: #fff3e0; color: #e65100; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .action-buttons { display: flex; gap: 5px; }
+    .btn-action { padding: 6px 12px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+    .btn-edit { background: #17a2b8; color: white; }
+    .btn-delete { background: #dc3545; color: white; }
+    .btn-action:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .empty-state-data { padding: 60px 20px; text-align: center; color: #95a5a6; }
+    .empty-icon { font-size: 64px; margin-bottom: 15px; }
+    .alert-data { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: none; }
+    .alert-data.show { display: block; }
+    .alert-data.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .alert-data.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
   </style>
   
   <div class="data-surat-container">
-    
-    <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">📋 Data Surat</h1>
       <p class="page-subtitle">Kelola dan lihat semua data surat</p>
     </div>
     
-    <!-- Alert Message -->
     <div id="alert-data" class="alert-data"></div>
     
-    <!-- Filter Section -->
     <div class="filter-section">
       <div class="filter-grid">
         <div class="filter-group">
           <label>🔍 Cari Surat</label>
           <input type="text" id="searchInput" placeholder="Nomor, perihal, atau tujuan..." onkeyup="filterTable()">
         </div>
-        
         <div class="filter-group">
           <label>📁 Bidang</label>
           <select id="filterBidang" onchange="filterTable()">
@@ -308,7 +69,6 @@
             <option value="Sekretariat">Sekretariat</option>
           </select>
         </div>
-        
         <div class="filter-group">
           <label>📋 Jenis</label>
           <select id="filterJenis" onchange="filterTable()">
@@ -318,27 +78,18 @@
           </select>
         </div>
       </div>
-      
       <div class="filter-actions">
-        <button class="btn-data btn-secondary" onclick="resetFilter()">
-          🔄 Reset
-        </button>
-        <button class="btn-data btn-success" onclick="exportToExcel()">
-          📊 Excel
-        </button>
-        <button class="btn-data btn-warning" onclick="window.print()">
-          🖨️ Print
-        </button>
+        <button class="btn-data btn-secondary" onclick="resetFilter()">🔄 Reset</button>
+        <button class="btn-data btn-success" onclick="exportToExcel()">📊 Excel</button>
+        <button class="btn-data btn-warning" onclick="window.print()">🖨️ Print</button>
       </div>
     </div>
     
-    <!-- Table Section -->
     <div class="table-section">
       <div class="table-header">
         <div class="table-title">📝 Daftar Surat</div>
         <div class="result-count" id="resultCount">Loading...</div>
       </div>
-      
       <div class="data-table-container" id="tableContent">
         <div class="empty-state-data">
           <div class="empty-icon">⏳</div>
@@ -347,283 +98,185 @@
         </div>
       </div>
     </div>
-    
   </div>
   
   <script>
-    // ================================================================
-    // LOAD DATA SAAT TAB AKTIF
-    // ================================================================
-    (function() {
-      let dataLoaded = false;
-      let allTableRows = [];
-      
-      // Get session from tab element
-      const tabElement = document.getElementById('tab-data');
-      const SESSION_ID = tabElement ? tabElement.getAttribute('data-session-id') : '';
-      const USER_ROLE = tabElement ? tabElement.getAttribute('data-user-role') : '';
-      const USER_BIDANG = tabElement ? tabElement.getAttribute('data-user-bidang') : '';
-      
-      console.log('DataSurat Script Loaded:', { SESSION_ID, USER_ROLE, USER_BIDANG });
-      
-      // Function to load data
-      function loadDataSurat() {
-        if (dataLoaded) {
-          console.log('Data already loaded, skipping...');
-          return;
-        }
-        
-        console.log('Loading data...');
-        
-        if (!SESSION_ID) {
-          showError('Session tidak ditemukan. Silakan refresh halaman.');
-          return;
-        }
-        
-        // Call server
-        google.script.run
-          .withSuccessHandler(function(response) {
-            console.log('Load data response:', response);
-            
-            if (!response || typeof response !== 'object') {
-              showError('Response tidak valid dari server');
-              return;
-            }
-            
-            if (response.success) {
-              renderTable(response.data || []);
-              dataLoaded = true;
-            } else {
-              showError(response.message || 'Gagal memuat data');
-            }
-          })
-          .withFailureHandler(function(error) {
-            console.error('Load data error:', error);
-            showError('Error: ' + error.message);
-          })
-          .getSuratData(SESSION_ID, USER_ROLE, USER_BIDANG);
-      }
-      
-      // Function to render table
-      function renderTable(data) {
-        const container = document.getElementById('tableContent');
-        const resultCount = document.getElementById('resultCount');
-        
-        console.log('Rendering table with', data.length, 'items');
-        
-        resultCount.textContent = data.length + ' surat ditemukan';
-        
-        if (data.length === 0) {
-          container.innerHTML = `
-            <div class="empty-state-data">
-              <div class="empty-icon">📭</div>
-              <h3>Tidak Ada Data</h3>
-              <p>Belum ada surat yang tercatat. Silakan input surat baru di tab "Input Surat".</p>
-            </div>
-          `;
-          return;
-        }
-        
-        let tableHTML = `
-          <table class="data-table" id="suratTable">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Nomor Surat</th>
-                <th>Sumber</th>
-                <th>Bidang</th>
-                <th>Perihal</th>
-                <th>Jenis</th>
-                <th>Tujuan</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-        `;
-        
-        data.forEach(function(item, index) {
-          const tanggal = formatDate(item.tanggal);
-          const sumberBadge = item.sumber === 'Srikandi' ? 'badge-srikandi' : 'badge-manual';
-          const jenisBadge = item.jenis === 'Surat Masuk' ? 'badge-masuk' : 'badge-keluar';
-          
-          tableHTML += `
-            <tr data-nomor="${item.nomor}" data-bidang="${item.bidang}" data-jenis="${item.jenis || ''}" data-perihal="${item.perihal || ''}" data-tujuan="${item.tujuan || ''}">
-              <td>${index + 1}</td>
-              <td>${tanggal}</td>
-              <td><strong>${item.nomor}</strong></td>
-              <td><span class="${sumberBadge}">${item.sumber}</span></td>
-              <td>${item.bidang}</td>
-              <td>${item.perihal || '-'}</td>
-              <td><span class="${jenisBadge}">${item.jenis || '-'}</span></td>
-              <td>${item.tujuan || '-'}</td>
-              <td>
-                <div class="action-buttons">
-                  <button class="btn-action btn-edit" onclick="editSurat('${item.id}')">✏️</button>
-                  <button class="btn-action btn-delete" onclick="confirmDelete('${item.id}', '${item.nomor}')">🗑️</button>
-                </div>
-              </td>
-            </tr>
-          `;
-        });
-        
-        tableHTML += `
-            </tbody>
-          </table>
-        `;
-        
-        container.innerHTML = tableHTML;
-        
-        // Store rows for filtering
-        allTableRows = data;
-      }
-      
-      // Function to show error
-      function showError(message) {
-        const container = document.getElementById('tableContent');
-        container.innerHTML = `
-          <div class="empty-state-data">
-            <div class="empty-icon">⚠️</div>
-            <h3>Error</h3>
-            <p>${message}</p>
-            <button class="btn-data btn-secondary" onclick="location.reload()" style="margin-top: 15px;">
-              🔄 Refresh
-            </button>
-          </div>
-        `;
-        
-        const resultCount = document.getElementById('resultCount');
-        resultCount.textContent = 'Error';
-      }
-      
-      // Format date helper
-      function formatDate(date) {
-        if (!date) return '-';
-        const d = new Date(date);
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const year = d.getFullYear();
-        return day + '/' + month + '/' + year;
-      }
-      
-      // Observer to detect when tab becomes active
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.target.id === 'tab-data' && mutation.target.classList.contains('active')) {
-            console.log('Tab Data Surat activated');
-            setTimeout(loadDataSurat, 100);
-          }
-        });
-      });
-      
-      if (tabElement) {
-        observer.observe(tabElement, { attributes: true, attributeFilter: ['class'] });
-        
-        // Check if already active
-        if (tabElement.classList.contains('active')) {
-          setTimeout(loadDataSurat, 100);
-        }
-      }
-      
-      // Make functions global
-      window.loadDataSurat = loadDataSurat;
-      window.allTableRows = allTableRows;
-      
-    })();
+  (function() {
+    let dataLoaded = false;
     
-    // ================================================================
-    // FILTER FUNCTIONS
-    // ================================================================
-    function filterTable() {
-      const searchText = document.getElementById('searchInput').value.toLowerCase();
-      const bidangFilter = document.getElementById('filterBidang').value;
-      const jenisFilter = document.getElementById('filterJenis').value;
-      
-      const table = document.getElementById('suratTable');
-      if (!table) return;
-      
-      const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-      let visibleCount = 0;
-      
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const nomor = (row.getAttribute('data-nomor') || '').toLowerCase();
-        const bidang = row.getAttribute('data-bidang') || '';
-        const jenis = row.getAttribute('data-jenis') || '';
-        const perihal = (row.getAttribute('data-perihal') || '').toLowerCase();
-        const tujuan = (row.getAttribute('data-tujuan') || '').toLowerCase();
-        
-        const matchSearch = !searchText || 
-          nomor.includes(searchText) || 
-          perihal.includes(searchText) || 
-          tujuan.includes(searchText);
-        
-        const matchBidang = !bidangFilter || bidang === bidangFilter;
-        const matchJenis = !jenisFilter || jenis === jenisFilter;
-        
-        if (matchSearch && matchBidang && matchJenis) {
-          row.style.display = '';
-          visibleCount++;
-        } else {
-          row.style.display = 'none';
-        }
-      }
-      
-      document.getElementById('resultCount').textContent = visibleCount + ' surat ditemukan';
+    // CRITICAL: Use same method as InputSurat.html (which WORKS!)
+    const tabData = document.getElementById('tab-data') || 
+                    document.querySelector('[data-session-id]') ||
+                    document.currentScript.closest('[data-session-id]');
+    
+    let sessionId = '';
+    let userRole = '';
+    let userBidang = '';
+    
+    if (tabData) {
+      sessionId = tabData.getAttribute('data-session-id') || '';
+      userRole = tabData.getAttribute('data-user-role') || '';
+      userBidang = tabData.getAttribute('data-user-bidang') || '';
+      console.log('✓ Got data from data attributes');
     }
     
-    function resetFilter() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('filterBidang').value = '';
-      document.getElementById('filterJenis').value = '';
-      filterTable();
+    // Fallback methods
+    if (!sessionId || sessionId === 'undefined') {
+      if (typeof window.SESSION_ID !== 'undefined') {
+        sessionId = window.SESSION_ID;
+        console.log('✓ Got from window.SESSION_ID');
+      } else if (typeof parent.SESSION_ID !== 'undefined') {
+        sessionId = parent.SESSION_ID;
+        console.log('✓ Got from parent.SESSION_ID');
+      }
     }
     
-    // ================================================================
-    // CRUD FUNCTIONS
-    // ================================================================
-    function editSurat(id) {
-      alert('Fitur edit akan segera hadir!\nSurat ID: ' + id);
+    console.log('=== DataSurat Initialization ===');
+    console.log('Session ID:', sessionId);
+    console.log('User Role:', userRole);
+    console.log('User Bidang:', userBidang);
+    console.log('Session ID length:', sessionId ? sessionId.length : 0);
+    
+    // Validate session
+    if (!sessionId || sessionId === 'undefined' || sessionId.includes('<?=')) {
+      console.error('❌ Session ID not valid!');
+      showError('Session tidak valid. Silakan refresh halaman atau login kembali.');
+      return;
+    } else {
+      console.log('✓ Session ID valid, will load data when tab active');
     }
     
-    function confirmDelete(suratId, nomorSurat) {
-      if (!confirm('Apakah Anda yakin ingin menghapus surat:\n' + nomorSurat + '?')) {
+    function loadDataSurat() {
+      if (dataLoaded) {
+        console.log('Data already loaded');
         return;
       }
       
-      showAlert('Menghapus surat...', 'info');
-      
-      const tabElement = document.getElementById('tab-data');
-      const sessionId = tabElement ? tabElement.getAttribute('data-session-id') : '';
+      console.log('🚀 Loading data...');
+      console.log('Calling getSuratData with:', { sessionId: sessionId.substring(0,20)+'...', userRole, userBidang });
       
       google.script.run
         .withSuccessHandler(function(response) {
-          if (response && response.success) {
-            showAlert(response.message, 'success');
-            setTimeout(function() {
-              location.reload();
-            }, 1500);
+          console.log('✅ Response received:', response);
+          
+          if (!response || typeof response !== 'object') {
+            showError('Response tidak valid dari server');
+            return;
+          }
+          
+          if (response.success) {
+            renderTable(response.data || []);
+            dataLoaded = true;
           } else {
-            showAlert(response ? response.message : 'Gagal menghapus', 'error');
+            showError(response.message || 'Gagal memuat data');
           }
         })
         .withFailureHandler(function(error) {
-          showAlert('Error: ' + error.message, 'error');
+          console.error('❌ Load error:', error);
+          showError('Error: ' + error.message);
         })
-        .deleteSurat(suratId, sessionId);
+        .getSuratData(sessionId, userRole, userBidang);
     }
     
-    function showAlert(message, type) {
-      const alert = document.getElementById('alert-data');
-      alert.textContent = message;
-      alert.className = 'alert-data ' + type + ' show';
+    function renderTable(data) {
+      const container = document.getElementById('tableContent');
+      const resultCount = document.getElementById('resultCount');
       
-      setTimeout(function() {
-        alert.classList.remove('show');
-      }, 5000);
+      console.log('Rendering', data.length, 'items');
+      resultCount.textContent = data.length + ' surat ditemukan';
+      
+      if (data.length === 0) {
+        container.innerHTML = '<div class="empty-state-data"><div class="empty-icon">📭</div><h3>Tidak Ada Data</h3><p>Belum ada surat yang tercatat.</p></div>';
+        return;
+      }
+      
+      let html = '<table class="data-table" id="suratTable"><thead><tr><th>No</th><th>Tanggal</th><th>Nomor Surat</th><th>Sumber</th><th>Bidang</th><th>Perihal</th><th>Jenis</th><th>Tujuan</th><th>Aksi</th></tr></thead><tbody>';
+      
+      data.forEach(function(item, i) {
+        const tgl = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-';
+        const srcBadge = item.sumber === 'Srikandi' ? 'badge-srikandi' : 'badge-manual';
+        const jnsBadge = item.jenis === 'Surat Masuk' ? 'badge-masuk' : 'badge-keluar';
+        
+        html += '<tr data-nomor="' + item.nomor + '" data-bidang="' + item.bidang + '" data-jenis="' + (item.jenis||'') + '" data-perihal="' + (item.perihal||'') + '" data-tujuan="' + (item.tujuan||'') + '">' +
+          '<td>' + (i+1) + '</td>' +
+          '<td>' + tgl + '</td>' +
+          '<td><strong>' + item.nomor + '</strong></td>' +
+          '<td><span class="' + srcBadge + '">' + item.sumber + '</span></td>' +
+          '<td>' + item.bidang + '</td>' +
+          '<td>' + (item.perihal || '-') + '</td>' +
+          '<td><span class="' + jnsBadge + '">' + (item.jenis || '-') + '</span></td>' +
+          '<td>' + (item.tujuan || '-') + '</td>' +
+          '<td><div class="action-buttons">' +
+          '<button class="btn-action btn-edit" onclick="alert(\'Edit: ' + item.id + '\')">✏️</button>' +
+          '<button class="btn-action btn-delete" onclick="confirmDelete(\'' + item.id + '\',\'' + item.nomor + '\')">🗑️</button>' +
+          '</div></td></tr>';
+      });
+      
+      html += '</tbody></table>';
+      container.innerHTML = html;
     }
     
-    function exportToExcel() {
-      alert('Fitur export Excel akan segera hadir!');
+    function showError(msg) {
+      document.getElementById('tableContent').innerHTML = '<div class="empty-state-data"><div class="empty-icon">⚠️</div><h3>Error</h3><p>' + msg + '</p><button class="btn-data btn-secondary" onclick="location.reload()" style="margin-top:15px">🔄 Refresh</button></div>';
+      document.getElementById('resultCount').textContent = 'Error';
     }
+    
+    window.confirmDelete = function(id, nomor) {
+      if (!confirm('Hapus surat: ' + nomor + '?')) return;
+      google.script.run
+        .withSuccessHandler(function(r) { if (r && r.success) { alert(r.message); location.reload(); } else alert(r ? r.message : 'Gagal'); })
+        .withFailureHandler(function(e) { alert('Error: ' + e.message); })
+        .deleteSurat(id, sessionId);
+    };
+    
+    // Auto-load when this script runs (tab is already active)
+    setTimeout(function() {
+      console.log('Auto-loading data in 1 second...');
+      setTimeout(loadDataSurat, 1000);
+    }, 100);
+    
+    window.loadDataSurat = loadDataSurat;
+  })();
+  
+  function filterTable() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const bidang = document.getElementById('filterBidang').value;
+    const jenis = document.getElementById('filterJenis').value;
+    const table = document.getElementById('suratTable');
+    if (!table) return;
+    
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    let count = 0;
+    
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const nomor = (row.getAttribute('data-nomor') || '').toLowerCase();
+      const rowBidang = row.getAttribute('data-bidang') || '';
+      const rowJenis = row.getAttribute('data-jenis') || '';
+      const perihal = (row.getAttribute('data-perihal') || '').toLowerCase();
+      const tujuan = (row.getAttribute('data-tujuan') || '').toLowerCase();
+      
+      const matchSearch = !search || nomor.includes(search) || perihal.includes(search) || tujuan.includes(search);
+      const matchBidang = !bidang || rowBidang === bidang;
+      const matchJenis = !jenis || rowJenis === jenis;
+      
+      if (matchSearch && matchBidang && matchJenis) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    }
+    
+    document.getElementById('resultCount').textContent = count + ' surat ditemukan';
+  }
+  
+  function resetFilter() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterBidang').value = '';
+    document.getElementById('filterJenis').value = '';
+    filterTable();
+  }
+  
+  function exportToExcel() { alert('Fitur Excel akan segera hadir!'); }
   </script>

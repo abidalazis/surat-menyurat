@@ -920,44 +920,49 @@ function submitSurat(formData) {
  */
 function getSuratData(sessionId, userRole, userBidang) {
   try {
-    Logger.log('=== getSuratData START (DEBUG) ===');
-    Logger.log('Params received:');
-    Logger.log('  sessionId: ' + sessionId);
-    Logger.log('  userRole: ' + userRole);
-    Logger.log('  userBidang: ' + userBidang);
+    Logger.log('=== getSuratData START ===');
+    Logger.log('Parameters:');
+    Logger.log('  sessionId: ' + (sessionId || 'EMPTY'));
+    Logger.log('  userRole: ' + (userRole || 'EMPTY'));
+    Logger.log('  userBidang: ' + (userBidang || 'EMPTY'));
     
-    // STEP 1: Validasi session
-    Logger.log('STEP 1: Validating session...');
+    // Validate parameters
+    if (!sessionId) {
+      Logger.log('ERROR: sessionId is empty!');
+      return {
+        success: false,
+        message: 'Session ID kosong'
+      };
+    }
+    
+    // Get session
+    Logger.log('Getting session...');
     const session = getSessionById(sessionId);
     
     if (!session) {
-      Logger.log('ERROR: Session not found!');
+      Logger.log('ERROR: Session not found for ID: ' + sessionId);
       return {
         success: false,
-        message: 'Session tidak ditemukan. Session ID: ' + sessionId
+        message: 'Session tidak ditemukan'
       };
     }
     
-    Logger.log('Session found: ' + JSON.stringify(session));
+    Logger.log('Session found: ' + session.username);
     
+    // Check if valid
     if (!isSessionValid(session)) {
-      Logger.log('ERROR: Session expired!');
+      Logger.log('ERROR: Session expired');
       return {
         success: false,
-        message: 'Session expired. Please login again.'
+        message: 'Session expired'
       };
     }
     
-    Logger.log('Session is valid ✓');
+    Logger.log('Session valid ✓');
     
-    // STEP 2: Get spreadsheet
-    Logger.log('STEP 2: Getting spreadsheet...');
+    // Get sheet
+    Logger.log('Getting sheet DATA_SURAT...');
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    Logger.log('Spreadsheet ID: ' + ss.getId());
-    Logger.log('Spreadsheet Name: ' + ss.getName());
-    
-    // STEP 3: Get sheet
-    Logger.log('STEP 3: Getting DATA_SURAT sheet...');
     const sheet = ss.getSheetByName('DATA_SURAT');
     
     if (!sheet) {
@@ -966,45 +971,34 @@ function getSuratData(sessionId, userRole, userBidang) {
       ss.getSheets().forEach(function(s) {
         Logger.log('  - ' + s.getName());
       });
+      
       return {
         success: false,
-        message: 'Sheet DATA_SURAT tidak ditemukan. Jalankan quickSetup() terlebih dahulu.'
+        message: 'Sheet DATA_SURAT tidak ditemukan'
       };
     }
     
-    Logger.log('Sheet found: ' + sheet.getName());
+    Logger.log('Sheet found ✓');
     
-    // STEP 4: Get data
-    Logger.log('STEP 4: Reading data from sheet...');
+    // Get data
     const data = sheet.getDataRange().getValues();
-    Logger.log('Total rows (including header): ' + data.length);
+    Logger.log('Total rows: ' + data.length);
     
     if (data.length <= 1) {
-      Logger.log('No data found (only header row)');
+      Logger.log('No data rows (only header)');
       return {
         success: true,
         data: []
       };
     }
     
-    // STEP 5: Parse data
-    Logger.log('STEP 5: Parsing data...');
+    // Parse data
     const result = [];
-    
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
       
-      // Log first row for debugging
-      if (i === 1) {
-        Logger.log('First data row (as sample):');
-        Logger.log('  ID: ' + row[0]);
-        Logger.log('  Nomor: ' + row[3]);
-        Logger.log('  Bidang: ' + row[8]);
-      }
-      
-      // Filter berdasarkan role
+      // Filter by role
       if (userRole !== 'admin' && row[8] !== userBidang) {
-        Logger.log('Skipping row ' + i + ' (bidang: ' + row[8] + ', user bidang: ' + userBidang + ')');
         continue;
       }
       
@@ -1026,8 +1020,7 @@ function getSuratData(sessionId, userRole, userBidang) {
       });
     }
     
-    Logger.log('STEP 6: Returning results');
-    Logger.log('Total records found: ' + result.length);
+    Logger.log('Returning ' + result.length + ' records');
     Logger.log('=== getSuratData SUCCESS ===');
     
     return {
@@ -1037,17 +1030,16 @@ function getSuratData(sessionId, userRole, userBidang) {
     
   } catch (error) {
     Logger.log('=== getSuratData ERROR ===');
-    Logger.log('Error type: ' + error.name);
+    Logger.log('Error name: ' + error.name);
     Logger.log('Error message: ' + error.message);
     Logger.log('Error stack: ' + error.stack);
     
     return {
       success: false,
-      message: 'Error: ' + error.message + ' (Cek Executions log untuk detail)'
+      message: 'Error: ' + error.message
     };
   }
 }
-
 
 /**
  * Delete surat
