@@ -1,0 +1,295 @@
+<style>
+  .laporan-container { padding: 0; }
+  .report-controls {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 150px;
+  }
+  
+  .control-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .control-group select, .control-group input {
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .btn-generate {
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-generate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  
+  .report-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .summary-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+  
+  .summary-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 10px 0;
+  }
+  
+  .summary-label {
+    font-size: 13px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .chart-section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+  }
+  
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .report-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-size: 13px;
+    border-bottom: 2px solid #dde1e7;
+  }
+  
+  .report-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  
+  .print-header { display: none; }
+  
+  @media print {
+    body * { visibility: hidden; }
+    .laporan-container, .laporan-container * { visibility: visible; }
+    .laporan-container { position: absolute; left: 0; top: 0; width: 100%; }
+    .report-controls, .btn-generate { display: none; }
+    .print-header { display: block; text-align: center; margin-bottom: 30px; }
+  }
+</style>
+
+<div class="laporan-container">
+  <div class="page-header">
+    <h1 class="page-title">📈 Laporan & Statistik</h1>
+    <p class="page-subtitle">Rekapitulasi data surat menyurat</p>
+  </div>
+  
+  <div class="report-controls">
+    <div class="control-group">
+      <label>Tahun</label>
+      <select id="reportYear">
+        <!-- JS will populate -->
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Bulan</label>
+      <select id="reportMonth">
+        <option value="0">Januari</option>
+        <option value="1">Februari</option>
+        <option value="2">Maret</option>
+        <option value="3">April</option>
+        <option value="4">Mei</option>
+        <option value="5">Juni</option>
+        <option value="6">Juli</option>
+        <option value="7">Agustus</option>
+        <option value="8">September</option>
+        <option value="9">Oktober</option>
+        <option value="10">November</option>
+        <option value="11">Desember</option>
+        <option value="all">Semua Bulan</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Bidang</label>
+      <select id="reportBidang">
+        <option value="">Semua Bidang</option>
+        <option value="Sekretariat">Sekretariat</option>
+        <option value="Tata Pemerintahan">Tata Pemerintahan</option>
+        <option value="Pemberdayaan Masyarakat">Pemberdayaan Masyarakat</option>
+        <option value="Pelayanan Umum">Pelayanan Umum</option>
+        <option value="Kesejahteraan Masyarakat">Kesejahteraan Masyarakat</option>
+        <option value="Trantib">Trantib</option>
+      </select>
+    </div>
+    
+    <button class="btn-generate" onclick="generateReport()">📅 Tampilkan Data</button>
+  </div>
+  
+  <div id="reportContent" style="display: none;">
+    
+    <div class="print-header">
+      <h2>LAPORAN SURAT MENYURAT</h2>
+      <p id="printSubtitle">Periode: -</p>
+    </div>
+  
+    <div class="report-summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Total Surat</div>
+        <div class="summary-value" id="totalSurat">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Surat Masuk</div>
+        <div class="summary-value" id="totalMasuk" style="color: #27ae60;">0</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Surat Keluar</div>
+        <div class="summary-value" id="totalKeluar" style="color: #e67e22;">0</div>
+      </div>
+    </div>
+    
+    <div class="chart-section">
+      <h3>📋 Rincian Data</h3>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Nomor</th>
+            <th>Perihal</th>
+            <th>Jenis</th>
+            <th>Bidang</th>
+          </tr>
+        </thead>
+        <tbody id="reportTableBody">
+          <!-- Data populated here -->
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="text-align: right; margin-top: 20px;">
+      <button class="btn-data btn-warning" onclick="window.print()">🖨️ Cetak Laporan</button>
+    </div>
+    
+  </div>
+  
+</div>
+
+<script>
+  (function() {
+    // Init Year Dropdown
+    const currentYear = new Date().getFullYear();
+    const yearSelect = document.getElementById('reportYear');
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+    
+    // Set current month
+    document.getElementById('reportMonth').value = new Date().getMonth();
+    
+    window.generateReport = function() {
+      const year = document.getElementById('reportYear').value;
+      const month = document.getElementById('reportMonth').value;
+      const bidang = document.getElementById('reportBidang').value;
+      
+      const btn = document.querySelector('.btn-generate');
+      const originalText = btn.textContent;
+      btn.textContent = '⏳ Memuat...';
+      btn.disabled = true;
+      
+      console.log('Generating report:', { year, month, bidang });
+      
+      google.script.run
+        .withSuccessHandler(data => {
+          btn.textContent = originalText;
+          btn.disabled = false;
+          renderReport(data);
+        })
+        .withFailureHandler(err => {
+          btn.textContent = originalText;
+          btn.disabled = false;
+          alert('Error: ' + err.message);
+        })
+        .getReportData(window.SESSION_ID, year, month, bidang);
+    };
+    
+    function renderReport(data) {
+      if (!data.success) {
+        alert(data.message);
+        return;
+      }
+      
+      document.getElementById('reportContent').style.display = 'block';
+      
+      // Update stats
+      document.getElementById('totalSurat').textContent = data.summary.total;
+      document.getElementById('totalMasuk').textContent = data.summary.masuk;
+      document.getElementById('totalKeluar').textContent = data.summary.keluar;
+      
+      // Update table
+      const tbody = document.getElementById('reportTableBody');
+      tbody.innerHTML = '';
+      
+      if (data.details.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Tidak ada data untuk periode ini</td></tr>';
+      } else {
+        data.details.forEach(item => {
+            const row = `<tr>
+                <td>${item.tanggal}</td>
+                <td><strong>${item.nomor}</strong></td>
+                <td>${item.perihal}</td>
+                <td><span class="badge-${item.jenis === 'Surat Masuk' ? 'masuk' : 'keluar'}">${item.jenis}</span></td>
+                <td>${item.bidang}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+      }
+      
+      // Update print subtitle
+      const monthName = document.getElementById('reportMonth').options[document.getElementById('reportMonth').selectedIndex].text;
+      document.getElementById('printSubtitle').textContent = `Periode: ${monthName} ${document.getElementById('reportYear').value}`;
+    }
+  })();
+</script>

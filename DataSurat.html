@@ -63,10 +63,12 @@
           <label>📁 Bidang</label>
           <select id="filterBidang" onchange="filterTable()">
             <option value="">Semua Bidang</option>
-            <option value="Kepegawaian">Kepegawaian</option>
-            <option value="Keuangan">Keuangan</option>
-            <option value="Umum">Umum</option>
             <option value="Sekretariat">Sekretariat</option>
+            <option value="Tata Pemerintahan">Tata Pemerintahan</option>
+            <option value="Pemberdayaan Masyarakat">Pemberdayaan Masyarakat</option>
+            <option value="Pelayanan Umum">Pelayanan Umum</option>
+            <option value="Kesejahteraan Masyarakat">Kesejahteraan Masyarakat</option>
+            <option value="Trantib">Trantib</option>
           </select>
         </div>
         <div class="filter-group">
@@ -188,7 +190,13 @@
       
       let html = '<table class="data-table" id="suratTable"><thead><tr><th>No</th><th>Tanggal</th><th>Nomor Surat</th><th>Sumber</th><th>Bidang</th><th>Perihal</th><th>Jenis</th><th>Tujuan</th><th>Aksi</th></tr></thead><tbody>';
       
+      // Initialize cache
+      window.suratDataCache = {};
+      
       data.forEach(function(item, i) {
+        // Cache data for edit
+        window.suratDataCache[item.id] = item;
+        
         const tgl = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-';
         const srcBadge = item.sumber === 'Srikandi' ? 'badge-srikandi' : 'badge-manual';
         const jnsBadge = item.jenis === 'Surat Masuk' ? 'badge-masuk' : 'badge-keluar';
@@ -203,14 +211,38 @@
           '<td><span class="' + jnsBadge + '">' + (item.jenis || '-') + '</span></td>' +
           '<td>' + (item.tujuan || '-') + '</td>' +
           '<td><div class="action-buttons">' +
-          '<button class="btn-action btn-edit" onclick="alert(\'Edit: ' + item.id + '\')">✏️</button>' +
-          '<button class="btn-action btn-delete" onclick="confirmDelete(\'' + item.id + '\',\'' + item.nomor + '\')">🗑️</button>' +
+          '<button class="btn-action btn-edit" type="button" onclick="editSurat(\'' + item.id + '\')">✏️</button>' +
+          '<button class="btn-action btn-delete" type="button" onclick="confirmDelete(\'' + item.id + '\',\'' + item.nomor + '\')">🗑️</button>' +
           '</div></td></tr>';
       });
       
       html += '</tbody></table>';
       container.innerHTML = html;
     }
+    
+    // Edit Handler
+    window.editSurat = function(id) {
+        const data = window.suratDataCache[id];
+        if (data) {
+           // Format date for input (YYYY-MM-DD)
+           if (data.tanggal && data.tanggal.indexOf('T') > -1) {
+               data.tanggalIso = data.tanggal.substring(0, 10);
+           } else {
+               data.tanggalIso = data.tanggal; 
+           }
+           
+           console.log('Editing surat:', data);
+           
+           if (typeof window.switchTab === 'function') {
+               window.switchTab('input', data);
+           } else {
+               console.error('switchTab function not found');
+               alert('Error: Gagal pindah ke tab input');
+           }
+        } else {
+           alert('Error: Data surat tidak ditemukan di cache');
+        }
+    };
     
     function showError(msg) {
       document.getElementById('tableContent').innerHTML = '<div class="empty-state-data"><div class="empty-icon">⚠️</div><h3>Error</h3><p>' + msg + '</p><button class="btn-data btn-secondary" onclick="location.reload()" style="margin-top:15px">🔄 Refresh</button></div>';

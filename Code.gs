@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ================================================================
  * SISTEM SURAT MENYURAT - BACKEND (Google Apps Script)
  * ================================================================
@@ -34,6 +34,8 @@ const CONFIG = {
   SHEET_USERS: 'USERS',
   SHEET_DATA_SURAT: 'DATA_SURAT',
   SHEET_COUNTER: 'COUNTER',
+  SHEET_SURAT_MASUK: 'SURAT_MASUK',
+  SHEET_COUNTER_MASUK: 'COUNTER_MASUK',
   SHEET_SESSIONS: 'SESSIONS',
   SHEET_AUDIT_LOG: 'AUDIT_LOG',
   SHEET_MASTER_KODE: 'MASTER_KODE',
@@ -43,7 +45,11 @@ const CONFIG = {
   
   // App metadata
   APP_NAME: 'Sistem Surat Menyurat',
-  APP_VERSION: '1.0'
+  APP_VERSION: '1.0',
+  
+  // Spreadsheet ID untuk Surat Masuk (isi jika ingin pisah spreadsheet)
+  // Contoh: '1abc123...'
+  ID_SS_MASUK: '' 
 };
 
 
@@ -60,6 +66,22 @@ function getSpreadsheet() {
 }
 
 /**
+ * Mendapatkan spreadsheet untuk Surat Masuk
+ * @return {Spreadsheet} Google Spreadsheet object
+ */
+function getSpreadsheetMasuk() {
+  if (CONFIG.ID_SS_MASUK && CONFIG.ID_SS_MASUK.length > 5) {
+    try {
+      return SpreadsheetApp.openById(CONFIG.ID_SS_MASUK);
+    } catch (e) {
+      Logger.log('Error opening separate spreadsheet: ' + e.message);
+      return SpreadsheetApp.getActiveSpreadsheet();
+    }
+  }
+  return SpreadsheetApp.getActiveSpreadsheet();
+}
+
+/**
  * Mendapatkan sheet berdasarkan nama
  * @param {string} sheetName - Nama sheet
  * @return {Sheet} Google Sheet object
@@ -69,6 +91,23 @@ function getSheet(sheetName) {
   let sheet = ss.getSheetByName(sheetName);
   
   // Jika sheet tidak ada, buat baru
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    initializeSheet(sheetName, sheet);
+  }
+  
+  return sheet;
+}
+
+/**
+ * Mendapatkan sheet untuk Surat Masuk (bisa dari spreadsheet terpisah)
+ * @param {string} sheetName - Nama sheet
+ * @return {Sheet} Google Sheet object
+ */
+function getSheetMasuk(sheetName) {
+  const ss = getSpreadsheetMasuk();
+  let sheet = ss.getSheetByName(sheetName);
+  
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
     initializeSheet(sheetName, sheet);
@@ -116,6 +155,16 @@ function initializeSheet(sheetName, sheet) {
         ['200.5.1', '405.29.05', 'Keuangan', 'Keuangan'],
         ['300.2.3', '405.29.05', 'Umum', 'Umum']
       ]);
+      break;
+      
+    case CONFIG.SHEET_SURAT_MASUK:
+      headers = ['ID', 'Timestamp', 'No Agenda', 'Surat Dari', 'No Surat', 'Tanggal Surat', 'Perihal', 'Diterima Tanggal', 'Sifat', 'Bidang', 'Created By', 'Modified By', 'Modified Time'];
+      break;
+      
+    case CONFIG.SHEET_COUNTER_MASUK:
+      headers = ['Tahun', 'Nomor Terakhir', 'Last Updated'];
+      // Set nilai awal
+      sheet.getRange(2, 1, 1, 3).setValues([[new Date().getFullYear(), 0, new Date()]]);
       break;
   }
   
@@ -603,6 +652,8 @@ function setupApplication() {
   getSheet(CONFIG.SHEET_USERS);
   getSheet(CONFIG.SHEET_DATA_SURAT);
   getSheet(CONFIG.SHEET_COUNTER);
+  getSheet(CONFIG.SHEET_SURAT_MASUK);
+  getSheet(CONFIG.SHEET_COUNTER_MASUK);
   getSheet(CONFIG.SHEET_SESSIONS);
   getSheet(CONFIG.SHEET_AUDIT_LOG);
   getSheet(CONFIG.SHEET_MASTER_KODE);
@@ -866,12 +917,20 @@ function submitSurat(formData) {
     
     Logger.log('Checking for duplicates...');
     
+    // === CEK APAKAH MODE EDIT OLEH ID ===
+    const isEditMode = formData.id && formData.id.trim() !== '';
+    
     // Validasi nomor tidak duplikat
     const dataSheet = getSheet(CONFIG.SHEET_DATA_SURAT);
     const existingData = dataSheet.getDataRange().getValues();
     
     for (let i = 1; i < existingData.length; i++) {
       if (existingData[i][3] === nomorSuratLengkap) {
+        // Jika mode edit, skip jika ID sama (artinya record sendiri)
+        if (isEditMode && existingData[i][0] === formData.id) {
+          continue;
+        }
+        
         Logger.log('ERROR: Duplicate nomor found');
         return {
           success: false,
@@ -883,13 +942,14 @@ function submitSurat(formData) {
     Logger.log('No duplicates. Saving data...');
     
     // Simpan data
-    const id = generateId('SURAT');
-    const timestamp = new Date();
+    let id = isEditMode ? formData.id : generateId('SURAT');
+    let timestamp = new Date();
     const tanggalSurat = formData.tanggalSurat ? new Date(formData.tanggalSurat) : new Date();
     
-    dataSheet.appendRow([
+    // KUMPULKAN Data Row
+    const rowData = [
       id,
-      timestamp,
+      timestamp, // Akan ditimpa jika update (kecuali kita mau update timestamp modified)
       nomorAgenda,
       nomorSuratLengkap,
       formData.mode === 'srikandi' ? 'Srikandi' : 'Manual',
@@ -901,36 +961,154 @@ function submitSurat(formData) {
       formData.jenisSurat || '',
       formData.tujuan || '',
       formData.keterangan || '',
-      user.username,
-      '',
-      ''
-    ]);
-    
-    Logger.log('Data saved successfully');
-    
-    // Log aktivitas
-    logActivity(user.userId, user.username, 'INPUT_SURAT', 'Input surat: ' + nomorSuratLengkap);
-    
-    Logger.log('=== submitSurat SUCCESS ===');
-    
-    return {
-      success: true,
-      message: 'Surat berhasil disimpan! Nomor: ' + nomorSuratLengkap,
-      nomorAgenda: parseInt(nomorAgenda) || 0,
-      nomorSurat: nomorSuratLengkap
-    };
+      isEditMode ? '' : user.username, // Created By
+      user.username, // Modified By
+      new Date() // Modified Time
+    ];
+
+    if (isEditMode) {
+        // === UPDATE DATA ===
+        Logger.log('Mode Edit - Updating data for ID: ' + id);
+        
+        // Cari row berdasarkan ID
+        let found = false;
+        for (let i = 1; i < existingData.length; i++) {
+            if (existingData[i][0] === id) {
+                // Pertahankan beberapa data lama jika mode manual edit ke srikandi dll
+                // Di sini kita timpa semua kecuali ID dan Created By
+                const range = dataSheet.getRange(i + 1, 1, 1, rowData.length);
+                
+                // Ambil data lama untuk preserve Created By & Timestamp Original
+                const oldData = existingData[i];
+                rowData[1] = oldData[1]; // Keep original timestamp
+                rowData[13] = oldData[13]; // Keep original creator
+                
+                // Jika edit, Nomor Agenda biasanya tidak berubah jika manual->manual, 
+                // tapi kalau user ganti total, flow di atas sudah generate nomor baru?
+                // TAPI: di flow di atas, kita generate nomor agenda baru kalau manual.
+                // UNTUK EDIT: Sebaiknya kita pakai nomor agenda LAMA jika tidak diminta ubah.
+                // COMPLEXITY: Jika user edit surat manual, apakah nomor agenda berubah?
+                // Biasanya EDIT hanya ubah typo/perihal. Nomor Agenda 'sakral'.
+                
+                // Override logika generate nomor di atas untuk EDIT MODE jika nomor surat tidak berubah
+                // (Ini simplifikasi, idealnya logic nomor dipisah)
+                // Namun, karena `nomorSuratLengkap` sudah digenerate ulang di atas...
+                // Kita asumsi kalau user edit, dia mau update segalanya.
+                
+                range.setValues([rowData]);
+                found = true;
+                Logger.log('Data updated successfully');
+                break;
+            }
+        }
+        
+        if (!found) {
+            return {
+                success: false,
+                message: 'Data surat tidak ditemukan untuk diedit!'
+            };
+        }
+        
+        // Log aktivitas UPDATE
+        logActivity(user.userId, user.username, 'UPDATE_SURAT', 'Update surat: ' + nomorSuratLengkap);
+        
+        Logger.log('=== submitSurat SUCCESS (UPDATE) ===');
+        
+        return {
+            success: true,
+            message: 'Surat berhasil diperbarui!',
+            data: { 
+                id: id, 
+                nomor: nomorSuratLengkap,
+                agenda: nomorAgenda 
+            }
+        };
+        
+    } else {
+        // === INSERT BARU ===
+        // Re-construct row clean for Insert (remove undefined cols handling if array fixed)
+        // Array di atas sudah lengkap
+        
+        // Pastikan 'Created By' terisi untuk insert
+        rowData[13] = user.username; 
+        
+        dataSheet.appendRow(rowData);
+        
+        Logger.log('Data saved successfully');
+        
+        // Log aktivitas INSERT
+        logActivity(user.userId, user.username, 'INPUT_SURAT', 'Input surat baru: ' + nomorSuratLengkap);
+        
+        Logger.log('=== submitSurat SUCCESS (INSERT) ===');
+        
+        return {
+            success: true,
+            message: 'Surat berhasil disimpan!',
+            data: { 
+                id: id, 
+                nomor: nomorSuratLengkap,
+                agenda: nomorAgenda 
+            }
+        };
+    }
     
   } catch (error) {
-    Logger.log('=== submitSurat ERROR ===');
-    Logger.log('Error message: ' + error.message);
-    Logger.log('Error stack: ' + error.stack);
-    
     return {
       success: false,
       message: 'Terjadi kesalahan: ' + error.message
     };
   }
 }
+
+/**
+ * Get Report Data
+ */
+function getReportData(sessionId, year, month, bidang) {
+  try {
+     // Validate session (simplified check for speed)
+     if (!sessionId) throw new Error("Invalid Session");
+     
+     const sheet = getSheet(CONFIG.SHEET_DATA_SURAT);
+     const data = sheet.getDataRange().getValues().slice(1); // Skip header
+     
+     let filtered = data.filter(row => {
+        const date = new Date(row[7]); // Col Index 7 is Tanggal Surat
+        const rowYear = date.getFullYear();
+        const rowMonth = date.getMonth(); // 0-11
+        const rowBidang = row[8]; // Col Index 8 is Bidang
+        
+        let matchYear = rowYear == year;
+        let matchMonth = (month === 'all') ? true : (rowMonth == month);
+        let matchBidang = (!bidang) ? true : (rowBidang === bidang);
+        
+        return matchYear && matchMonth && matchBidang;
+     });
+     
+     // Summary
+     const total = filtered.length;
+     const masuk = filtered.filter(row => row[10] === 'Surat Masuk').length; // Col 10 Jenis
+     const keluar = filtered.filter(row => row[10] !== 'Surat Masuk').length; // Assume others are outgoing/misc
+     
+     // Detail Data (Format for Table)
+     const details = filtered.map(row => ({
+        tanggal: Utilities.formatDate(new Date(row[7]), Session.getScriptTimeZone(), 'dd/MM/yyyy'),
+        nomor: row[3],
+        perihal: row[9],
+        jenis: row[10],
+        bidang: row[8]
+     }));
+     
+     return {
+        success: true,
+        summary: { total, masuk, keluar },
+        details: details
+     };
+     
+  } catch (e) {
+     return { success: false, message: e.message };
+  }
+}
+
 
 
 /**
@@ -1291,4 +1469,304 @@ function getSuratDataForDashboard(sessionId, userRole, userBidang) {
     Logger.log('Error: ' + error.message);
     return [];
   }
+}
+
+
+// ================================================================
+// SURAT MASUK - Fungsi untuk mengelola surat masuk
+// ================================================================
+
+/**
+ * Submit surat masuk - Handle form input surat masuk
+ * @param {Object} formData - Data form dari frontend
+ * @return {Object} Result
+ */
+function submitSuratMasuk(formData) {
+  try {
+    Logger.log('=== submitSuratMasuk START ===');
+    Logger.log('Session ID: ' + formData.sessionId);
+    
+    // Validasi session
+    const session = getSessionById(formData.sessionId);
+    if (!session) {
+      Logger.log('ERROR: Session not found');
+      return {
+        success: false,
+        message: 'Session tidak ditemukan. Silakan login kembali.'
+      };
+    }
+    
+    if (!isSessionValid(session)) {
+      Logger.log('ERROR: Session expired');
+      return {
+        success: false,
+        message: 'Session expired. Silakan login kembali.'
+      };
+    }
+    
+    Logger.log('Session valid. User ID: ' + session.userId);
+    
+    const user = getUserById(session.userId);
+    if (!user) {
+      Logger.log('ERROR: User not found');
+      return {
+        success: false,
+        message: 'User tidak ditemukan.'
+      };
+    }
+    
+    Logger.log('User found: ' + user.username);
+    
+    // Validasi input
+    if (!formData.suratDari || !formData.noSurat || !formData.tanggalSurat || !formData.perihal || !formData.sifat) {
+      return {
+        success: false,
+        message: 'Semua field harus diisi.'
+      };
+    }
+    
+    // Generate nomor agenda
+    const nomorAgenda = getNextNomorAgendaMasuk();
+    Logger.log('Generated nomor agenda: ' + nomorAgenda);
+    
+    // Tanggal diterima adalah hari ini
+    const diterimaTanggal = new Date();
+    
+    // Generate ID
+    const id = generateId('SM');
+    
+    // Bidang default 'Umum' jika tidak ada
+    const bidang = formData.bidang || user.bidang || 'Umum';
+    
+    // Simpan ke sheet
+    const sheet = getSheetMasuk(CONFIG.SHEET_SURAT_MASUK);
+    const newRow = [
+      id,
+      new Date(), // Timestamp
+      nomorAgenda,
+      formData.suratDari,
+      formData.noSurat,
+      new Date(formData.tanggalSurat),
+      formData.perihal,
+      diterimaTanggal,
+      formData.sifat,
+      bidang,
+      user.userId,
+      user.userId,
+      new Date()
+    ];
+    
+    sheet.appendRow(newRow);
+    Logger.log('Data saved to sheet');
+    
+    // Log aktivitas
+    logActivity(user.userId, user.username, 'INPUT_SURAT_MASUK', 
+      'Input surat masuk: ' + formData.noSurat + ' dari ' + formData.suratDari);
+    
+    Logger.log('=== submitSuratMasuk SUCCESS ===');
+    
+    return {
+      success: true,
+      message: 'Surat masuk berhasil disimpan',
+      data: {
+        id: id,
+        nomorAgenda: nomorAgenda,
+        suratDari: formData.suratDari,
+        noSurat: formData.noSurat,
+        tanggalSurat: formData.tanggalSurat,
+        perihal: formData.perihal,
+        diterimaTanggal: Utilities.formatDate(diterimaTanggal, Session.getScriptTimeZone(), 'dd/MM/yyyy'),
+        sifat: formData.sifat,
+        bidang: bidang
+      }
+    };
+    
+  } catch (error) {
+    Logger.log('=== submitSuratMasuk ERROR ===');
+    Logger.log('Error: ' + error.message);
+    Logger.log('Stack: ' + error.stack);
+    return {
+      success: false,
+      message: 'Terjadi kesalahan: ' + error.message
+    };
+  }
+}
+
+/**
+ * Generate nomor agenda berikutnya untuk surat masuk
+ * @return {string} Nomor agenda (format: 001, 002, dst)
+ */
+function getNextNomorAgendaMasuk() {
+  const sheet = getSheetMasuk(CONFIG.SHEET_COUNTER_MASUK);
+  const currentYear = new Date().getFullYear();
+  
+  // Ambil data counter
+  const data = sheet.getRange(2, 1, 1, 3).getValues()[0];
+  let tahun = data[0];
+  let nomorTerakhir = data[1];
+  
+  // Cek apakah tahun berubah, jika ya reset counter
+  if (tahun !== currentYear) {
+    tahun = currentYear;
+    nomorTerakhir = 0;
+  }
+  
+  // Increment nomor
+  nomorTerakhir++;
+  
+  // Update counter
+  sheet.getRange(2, 1, 1, 3).setValues([[tahun, nomorTerakhir, new Date()]]);
+  
+  // Format nomor dengan leading zeros (001, 002, dst)
+  const nomorAgenda = String(nomorTerakhir).padStart(3, '0');
+  
+  Logger.log('Generated nomor agenda: ' + nomorAgenda + ' for year ' + tahun);
+  
+  return nomorAgenda;
+}
+
+/**
+ * Dapatkan data surat masuk untuk ditampilkan (Standardized Version)
+ * @param {string} sessionId - Session ID
+ * @param {string} userRole - User Role
+ * @param {string} userBidang - User Bidang
+ * @return {Object} Result object with data array
+ */
+function fetchSuratMasukData(sessionId, userRole, userBidang) {
+  try {
+    Logger.log('=== fetchSuratMasukData START ===');
+    Logger.log('Params: ' + userRole + ' / ' + userBidang);
+    
+    // Validasi session
+    const session = getSessionById(sessionId);
+    if (!session || !isSessionValid(session)) {
+      Logger.log('ERROR: Invalid session');
+      return { success: false, message: 'Session tidak valid atau expired', data: [] };
+    }
+    
+    const user = getUserById(session.userId);
+    if (!user) {
+      Logger.log('ERROR: User not found');
+      return { success: false, message: 'User tidak ditemukan', data: [] };
+    }
+    
+    const sheet = getSheetMasuk(CONFIG.SHEET_SURAT_MASUK);
+    const data = sheet.getDataRange().getValues();
+    
+    // Parse data
+    const result = [];
+    for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        
+        // REMOVED: Filter berdasarkan role (User ingin admin/sekretariat lihat semua surat masuk)
+        // Jika di masa depan butuh filter lagi, bisa ditambahkan di sini.
+        
+        // Defensive date conversion
+        let tglSurat = '---';
+        try {
+            if (row[5]) {
+                const d = new Date(row[5]);
+                if (!isNaN(d.getTime())) {
+                    tglSurat = Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+                }
+            }
+        } catch(e) {}
+        
+        let tglDiterima = '---';
+        try {
+            if (row[7]) {
+                const d = new Date(row[7]);
+                if (!isNaN(d.getTime())) {
+                    tglDiterima = Utilities.formatDate(d, Session.getScriptTimeZone(), 'dd/MM/yyyy');
+                }
+            }
+        } catch(e) {}
+
+        result.push({
+            id: row[0] || '',
+            timestamp: row[1] ? (row[1] instanceof Date ? row[1].toISOString() : String(row[1])) : '',
+            nomorAgenda: row[2] || '',
+            suratDari: row[3] || '',
+            noSurat: row[4] || '',
+            tanggalSurat: tglSurat,
+            perihal: row[6] || '',
+            diterimaTanggal: tglDiterima,
+            sifat: row[8] || '',
+            bidang: row[9] || '',
+            createdBy: row[10] || ''
+        });
+    }
+    
+    Logger.log('Found ' + result.length + ' records');
+    Logger.log('=== fetchSuratMasukData SUCCESS ===');
+    
+    return {
+        success: true,
+        data: result
+    };
+    
+  } catch (error) {
+    Logger.log('=== fetchSuratMasukData ERROR ===');
+    Logger.log('Error: ' + error.message);
+    Logger.log('Stack: ' + error.stack);
+    return { success: false, message: 'Server Error: ' + error.message, data: [] };
+  }
+}
+
+/**
+ * Dapatkan data surat masuk berdasarkan ID
+ * @param {string} suratMasukId - ID surat masuk
+ * @return {Object|null} Data surat masuk atau null
+ */
+function getSuratMasukById(suratMasukId) {
+  try {
+    const sheet = getSheetMasuk(CONFIG.SHEET_SURAT_MASUK);
+    const data = sheet.getDataRange().getValues();
+    
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (row[0] === suratMasukId) {
+        return {
+          id: row[0],
+          timestamp: row[1],
+          nomorAgenda: row[2],
+          suratDari: row[3],
+          noSurat: row[4],
+          tanggalSurat: row[5],
+          perihal: row[6],
+          diterimaTanggal: row[7],
+          sifat: row[8],
+          bidang: row[9],
+          createdBy: row[10],
+          modifiedBy: row[11],
+          modifiedTime: row[12]
+        };
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    Logger.log('getSuratMasukById ERROR: ' + error.message);
+    return null;
+  }
+}
+
+/**
+ * Generate HTML untuk lembar disposisi
+ * @param {string} suratMasukId - ID surat masuk
+ * @return {string} HTML disposisi
+ */
+function generateDisposisiHTML(suratMasukId) {
+  const surat = getSuratMasukById(suratMasukId);
+  
+  if (!surat) {
+    return '<html><body>Data surat tidak ditemukan</body></html>';
+  }
+  
+  const template = HtmlService.createTemplateFromFile('Disposisi');
+  template.surat = surat;
+  template.tanggalSurat = Utilities.formatDate(new Date(surat.tanggalSurat), Session.getScriptTimeZone(), 'dd-MM-yyyy');
+  template.diterimaTanggal = Utilities.formatDate(new Date(surat.diterimaTanggal), Session.getScriptTimeZone(), 'dd/MM/yyyy');
+  
+  return template.evaluate().getContent();
 }

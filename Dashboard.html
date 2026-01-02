@@ -459,10 +459,16 @@
       📊 Home
     </button>
     <button class="tab-btn" onclick="switchTab('input')" data-tab="input">
-      ➕ Input Surat
+      ➕ Surat Keluar
     </button>
     <button class="tab-btn" onclick="switchTab('data')" data-tab="data">
-      📋 Data Surat
+      📋 Data Keluar
+    </button>
+    <button class="tab-btn" onclick="switchTab('input-masuk')" data-tab="input-masuk">
+      📨 Surat Masuk
+    </button>
+    <button class="tab-btn" onclick="switchTab('data-masuk')" data-tab="data-masuk">
+      📥 Data Masuk
     </button>
     <button class="tab-btn" onclick="switchTab('laporan')" data-tab="laporan">
       📈 Laporan
@@ -580,22 +586,22 @@
     </div>
     
     <!-- ============================================================
-         TAB: INPUT SURAT
+         TAB: INPUT SURAT KELUAR
          ============================================================ -->
     <div id="tab-input" class="tab-content" 
-         data-session-id="<?= sessionId ?>"
+         data-session-id="<?= sessionId ?>" 
          data-user-bidang="<?= user.bidang ?>"
          data-nomor-terakhir="<?= dashboardData.nomorTerakhir ?>">
       <div class="page-header">
-        <h1 class="page-title">➕ Input Surat Baru</h1>
-        <p class="page-subtitle">Form input surat dari Srikandi atau auto-generate</p>
+        <h1 class="page-title">➕ Input Surat Keluar</h1>
+        <p class="page-subtitle">Form input surat keluar dari Srikandi atau auto-generate</p>
       </div>
       
       <?!= include('InputSurat') ?>
     </div>
     
     <!-- ============================================================
-         TAB: DATA SURAT
+         TAB: DATA SURAT KELUAR
          ============================================================ -->
     <div id="tab-data" class="tab-content"
          data-session-id="<?= sessionId ?>"
@@ -605,19 +611,35 @@
     </div>
     
     <!-- ============================================================
-         TAB: LAPORAN (Akan dibuat di file terpisah nanti)
+         TAB: INPUT SURAT MASUK
          ============================================================ -->
-    <div id="tab-laporan" class="tab-content">
+    <div id="tab-input-masuk" class="tab-content" 
+         data-session-id="<?= sessionId ?>" 
+         data-user-bidang="<?= user.bidang ?>">
       <div class="page-header">
-        <h1 class="page-title">📈 Laporan & Statistik</h1>
-        <p class="page-subtitle">Analisis dan laporan surat</p>
+        <h1 class="page-title">📨 Input Surat Masuk</h1>
+        <p class="page-subtitle">Form input surat masuk dengan auto-generate nomor agenda</p>
       </div>
       
-      <div class="card" style="padding: 40px; text-align: center;">
-        <div style="font-size: 64px; margin-bottom: 20px;">🚧</div>
-        <h2>Fitur Laporan Sedang Dikembangkan</h2>
-        <p style="color: #7f8c8d; margin-top: 10px;">Fitur ini akan tersedia di update selanjutnya</p>
-      </div>
+      <?!= include('InputSuratMasuk') ?>
+    </div>
+    
+    <!-- ============================================================
+         TAB: DATA SURAT MASUK
+         ============================================================ -->
+    <div id="tab-data-masuk" class="tab-content"
+         data-session-id="<?= sessionId ?>"
+         data-user-role="<?= user.role ?>"
+         data-user-bidang="<?= user.bidang ?>">
+      <?!= include('DataSuratMasuk') ?>
+    </div>
+    
+    <!-- ============================================================
+         TAB: LAPORAN
+         ============================================================ -->
+    <div id="tab-laporan" class="tab-content"
+         data-session-id="<?= sessionId ?>">
+      <?!= include('Laporan') ?>
     </div>
     
   </div>
@@ -634,7 +656,7 @@
      * Switch between tabs
      * @param {string} tabName - Tab name to switch to
      */
-    function switchTab(tabName) {
+    function switchTab(tabName, data) {
       // Hide all tab contents
       const tabs = document.querySelectorAll('.tab-content');
       tabs.forEach(tab => tab.classList.remove('active'));
@@ -652,9 +674,26 @@
         activeBtn.classList.add('active');
       }
       
+      // Handle Edit Mode (Input Tab with Data)
+      if (tabName === 'input' && data) {
+         // Use setTimeout to ensure DOM is ready if needed, 
+         // though in single page it should be fine.
+         if (typeof window.loadSuratForEdit === 'function') {
+             console.log('Triggering Edit Mode with data:', data);
+             window.loadSuratForEdit(data);
+         } else {
+             console.error('Error: loadSuratForEdit function not found!');
+         }
+      }
+      
       // Auto-load data if switching to data tab
       if (tabName === 'data' && typeof window.loadDataSurat === 'function') {
         window.loadDataSurat();
+      }
+      
+      // Auto-load data if switching to data masuk tab
+      if (tabName === 'data-masuk' && typeof window.loadDataSuratMasuk === 'function') {
+        window.loadDataSuratMasuk();
       }
     }
     

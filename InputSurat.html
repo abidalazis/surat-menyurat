@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Input Surat</title>
-  
-  <style>
+<style>
     /* ================================================================
      * FORM INPUT STYLES
      * ================================================================ */
@@ -398,7 +391,6 @@
               <input 
                 type="date" 
                 id="tanggalSurat" 
-                required
               >
             </div>
             
@@ -421,14 +413,13 @@
               type="text" 
               id="perihal" 
               placeholder="Masukkan perihal surat"
-              required
             >
           </div>
           
           <div class="form-row">
             <div class="form-group">
               <label>Jenis Surat <span class="required">*</span></label>
-              <select id="jenisSurat" required>
+              <select id="jenisSurat">
                 <option value="">-- Pilih Jenis --</option>
                 <option value="Surat Keputusan (SK)">Surat Keputusan (SK)</option>
                 <option value="Surat Tugas">Surat Tugas</option>
@@ -480,10 +471,12 @@
           <span id="btnText">💾 Simpan Surat</span>
           <span class="spinner hidden" id="btnSpinner"></span>
         </button>
+
       </div>
       
+      <!-- Hidden ID for Edit Mode -->
+      <input type="hidden" id="editId" value="">
     </form>
-    
   </div>
   
   <script>
@@ -577,13 +570,9 @@
       if (mode === 'srikandi') {
         if (sectionSrikandi) sectionSrikandi.classList.remove('hidden');
         if (sectionManual) sectionManual.classList.add('hidden');
-        if (nomorLengkap) nomorLengkap.required = true;
-        if (kodeDepan) kodeDepan.required = false;
       } else {
         if (sectionSrikandi) sectionSrikandi.classList.add('hidden');
         if (sectionManual) sectionManual.classList.remove('hidden');
-        if (nomorLengkap) nomorLengkap.required = false;
-        if (kodeDepan) kodeDepan.required = true;
         updatePreview();
       }
     }
@@ -650,7 +639,10 @@
         jenisSurat: document.getElementById('jenisSurat').value,
         tujuan: document.getElementById('tujuan').value.trim(),
         keterangan: document.getElementById('keterangan').value.trim(),
-        sessionId: sessionId
+        tujuan: document.getElementById('tujuan').value.trim(),
+        keterangan: document.getElementById('keterangan').value.trim(),
+        sessionId: sessionId,
+        id: document.getElementById('editId').value // Add ID for edit mode
       };
       
       console.log('Form data:', formData);
@@ -723,7 +715,16 @@
         } else {
           // Reset all
           setTimeout(() => {
+            // Check if we are in Edit mode, if so, don't fully reset, maybe redirect?
+            // For now, standard behavior: reset form
             resetForm();
+            
+            // If it was an edit, change button text back to Simpan
+            if (document.getElementById('editId').value) {
+                document.getElementById('editId').value = '';
+                document.getElementById('btnText').textContent = '💾 Simpan Surat';
+            }
+            
             showAlert('✓ Surat berhasil disimpan!', 'success', 3000);
           }, 2000);
         }
@@ -791,12 +792,58 @@
         // Hide alert
         const alert = document.getElementById('alert');
         if (alert) alert.classList.remove('show');
+    // Reset Edit Mode
+        if (document.getElementById('editId')) document.getElementById('editId').value = '';
+        if (document.getElementById('btnText')) document.getElementById('btnText').textContent = '💾 Simpan Surat';
+        // Use selectMode to ensure required attributes are correctly toggled
+        selectMode('srikandi');
       }
+    }
+    
+    // ================================================================
+    // EDIT MODE HANDLER
+    // ================================================================
+    function loadSuratForEdit(data) {
+      console.log('loadSuratForEdit called with:', data);
+      
+      if (!data) return;
+      
+      // Select Mode based on data
+      const mode = (data.sumber === 'Manual') ? 'manual' : 'srikandi';
+      selectMode(mode);
+      
+      // Set values
+      document.getElementById('editId').value = data.id || '';
+      document.getElementById('tanggalSurat').value = data.tanggalIso || ''; // Assuming backend sends ISO YYYY-MM-DD
+      document.getElementById('bidang').value = data.bidang || '';
+      document.getElementById('perihal').value = data.perihal || '';
+      document.getElementById('jenisSurat').value = data.jenis || '';
+      document.getElementById('tujuan').value = data.tujuan || '';
+      document.getElementById('keterangan').value = data.keterangan || '';
+      
+      // Set Mode Specifics
+      if (mode === 'srikandi') {
+        document.getElementById('nomorLengkap').value = data.nomor || '';
+      } else {
+        // Manual
+        // Try to parse kode depan/belakang from nomor if possible, 
+        // OR just set text fields if we save them separately (we do: kodeDepan, kodeBelakang)
+        if (data.kodeDepan) document.getElementById('kodeDepan').value = data.kodeDepan;
+        if (data.kodeBelakang) document.getElementById('kodeBelakang').value = data.kodeBelakang;
+        updatePreview();
+      }
+      
+      // Update UI for Edit
+      document.getElementById('btnText').textContent = '💾 Update Surat';
+      
+      showAlert('✏️ Mode Edit: Silakan ubah data dan simpan', 'info', 3000);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
     // Make available globally
     window.resetForm = resetForm;
     window.updatePreview = updatePreview;
+    window.loadSuratForEdit = loadSuratForEdit;
     
     // ================================================================
     // INIT
@@ -824,5 +871,3 @@
     });
   </script>
   
-</body>
-</html>

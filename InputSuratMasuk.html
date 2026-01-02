@@ -1,0 +1,435 @@
+<style>
+    /* Form Input Styles */
+    .input-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .form-card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    
+    .form-section {
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #495057;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .form-group label .required {
+      color: #e74c3c;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .form-group input:read-only {
+      background: #f8f9fa;
+      cursor: not-allowed;
+    }
+    
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .form-group .hint {
+      font-size: 12px;
+      color: #7f8c8d;
+      margin-top: 5px;
+    }
+    
+    .preview-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .preview-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+    
+    .preview-nomor {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 10px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .preview-detail {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+    
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      flex: 1;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .alert {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    .alert.show {
+      display: block;
+    }
+    
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+  
+  <div class="input-container" id="input-surat-masuk-root">
+    <div id="alertMasuk" class="alert"></div>
+    
+    <div class="preview-box">
+      <div class="preview-label">📋 NOMOR AGENDA SURAT MASUK</div>
+      <div class="preview-nomor" id="previewNomorMasuk">---</div>
+      <div class="preview-detail">Nomor akan di-generate otomatis setelah submit</div>
+    </div>
+    
+    <form id="formInputMasuk" onsubmit="handleSubmitMasuk(event)">
+      <div class="form-card">
+        <div class="form-section">
+          <div class="section-title">
+            <span>📨</span>
+            <span>Data Surat Masuk</span>
+          </div>
+          
+          <div class="form-group">
+            <label>Surat Dari <span class="required">*</span></label>
+            <input type="text" id="suratDariMasuk" name="suratDari" placeholder="Contoh: DPMD, Dinas Pendidikan, dll">
+            <div class="hint">Nama instansi/lembaga pengirim surat</div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>No Surat <span class="required">*</span></label>
+              <input type="text" id="noSuratMasuk" name="noSurat" placeholder="Contoh: 400.10.2/KH/696/405.13/2025">
+            </div>
+            <div class="form-group">
+              <label>Tanggal Surat <span class="required">*</span></label>
+              <input type="date" id="tanggalSuratMasuk" name="tanggalSurat">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Perihal <span class="required">*</span></label>
+            <textarea id="perihalMasuk" name="perihal" placeholder="Masukkan perihal/isi surat"></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Diterima Tanggal</label>
+              <input type="text" id="diterimaTanggalMasuk" name="diterimaTanggal" readonly style="background: #f8f9fa;">
+            </div>
+            <div class="form-group">
+              <label>Sifat <span class="required">*</span></label>
+              <select id="sifatMasuk" name="sifat">
+                <option value="">-- Pilih Sifat --</option>
+                <option value="Biasa">Biasa</option>
+                <option value="Penting">Penting</option>
+                <option value="Segera">Segera</option>
+                <option value="Sangat Segera">Sangat Segera</option>
+                <option value="Rahasia">Rahasia</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" onclick="resetFormMasuk()">🔄 Reset</button>
+        <button type="submit" class="btn btn-primary" id="btnSubmitMasuk">
+          <span id="btnTextMasuk">💾 Simpan & Print Disposisi</span>
+          <span class="spinner hidden" id="btnSpinnerMasuk"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <script>
+  (function() {
+    /**
+     * InputSuratMasuk.html - Robust Script
+     */
+    let sessionIdMasuk = '';
+    
+    const root = document.getElementById('tab-input-masuk');
+    if (root) {
+      sessionIdMasuk = root.getAttribute('data-session-id') || '';
+    }
+    
+    if (!sessionIdMasuk && window.SESSION_ID) {
+      sessionIdMasuk = window.SESSION_ID;
+    }
+    
+    function initDatesMasuk() {
+      const today = new Date();
+      const tFormatted = today.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'});
+      const dEl = document.getElementById('diterimaTanggalMasuk');
+      if (dEl) dEl.value = tFormatted;
+      
+      const tISO = today.toISOString().split('T')[0];
+      const sEl = document.getElementById('tanggalSuratMasuk');
+      if (sEl) sEl.value = tISO;
+    }
+
+    function handleSubmitMasuk(event) {
+      if (event) event.preventDefault();
+      
+      const formData = {
+        suratDari: (document.getElementById('suratDariMasuk').value || '').trim(),
+        noSurat: (document.getElementById('noSuratMasuk').value || '').trim(),
+        tanggalSurat: document.getElementById('tanggalSuratMasuk').value,
+        perihal: (document.getElementById('perihalMasuk').value || '').trim(),
+        sifat: document.getElementById('sifatMasuk').value,
+        sessionId: sessionIdMasuk
+      };
+      
+      if (!formData.suratDari || !formData.noSurat || !formData.tanggalSurat || !formData.perihal || !formData.sifat) {
+        showAlertMasuk('❌ Semua field wajib diisi', 'error');
+        return;
+      }
+      
+      if (!sessionIdMasuk) {
+        showAlertMasuk('❌ Sesssion tidak valid', 'error');
+        return;
+      }
+      
+      setLoadingMasuk(true);
+      
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(handleSubmitSuccessMasuk)
+          .withFailureHandler(handleSubmitErrorMasuk)
+          .submitSuratMasuk(formData);
+      } else {
+        setLoadingMasuk(false);
+        alert('google.script.run error');
+      }
+    }
+    
+    function handleSubmitSuccessMasuk(response) {
+      setLoadingMasuk(false);
+      if (!response) {
+        showAlertMasuk('❌ Error: Server returned no response', 'error');
+        return;
+      }
+      
+      if (response.success) {
+        showAlertMasuk('✅ ' + response.message, 'success');
+        if (response.data && response.data.nomorAgenda) {
+          const p = document.getElementById('previewNomorMasuk');
+          if (p) p.textContent = response.data.nomorAgenda;
+        }
+        
+        if (response.data && response.data.id) {
+           setTimeout(function() { openDisposisiMasuk(response.data.id); }, 1000);
+        }
+        
+        setTimeout(function() {
+          resetFormMasuk();
+          showAlertMasuk('✓ Berhasil disimpan', 'success', 3000);
+        }, 2000);
+      } else {
+        showAlertMasuk('❌ ' + (response.message || 'Error unknown'), 'error');
+      }
+    }
+    
+    function handleSubmitErrorMasuk(error) {
+      setLoadingMasuk(false);
+      showAlertMasuk('❌ Error: ' + (error ? error.message : 'Unknown'), 'error');
+    }
+    
+    function openDisposisiMasuk(id) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(html) {
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+          })
+          .generateDisposisiHTML(id);
+      }
+    }
+    
+    function setLoadingMasuk(isLoading) {
+      const b = document.getElementById('btnSubmitMasuk');
+      const t = document.getElementById('btnTextMasuk');
+      const s = document.getElementById('btnSpinnerMasuk');
+      if (b) b.disabled = isLoading;
+      if (t) t.className = isLoading ? 'hidden' : '';
+      if (s) s.className = isLoading ? 'spinner' : 'spinner hidden';
+    }
+    
+    function showAlertMasuk(msg, type, duration) {
+      const a = document.getElementById('alertMasuk');
+      if (!a) return;
+      a.textContent = msg;
+      a.className = 'alert alert-' + type + ' show';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (duration) {
+         setTimeout(function() { a.classList.remove('show'); }, duration);
+      }
+    }
+    
+    function resetFormMasuk() {
+      const f = document.getElementById('formInputMasuk');
+      if (f) f.reset();
+      initDatesMasuk();
+      const p = document.getElementById('previewNomorMasuk');
+      if (p) p.textContent = '---';
+    }
+
+    // Expose
+    window.handleSubmitMasuk = handleSubmitMasuk;
+    window.resetFormMasuk = resetFormMasuk;
+    
+    // Init
+    initDatesMasuk();
+  })();
+  </script>

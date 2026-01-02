@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Lembar Disposisi</title>
+  <style>
+    @media print {
+      @page {
+        size: A4;
+        margin: 1cm;
+      }
+      
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 2px solid #000;
+      padding: 0;
+    }
+    
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #000;
+      padding: 15px;
+      position: relative;
+    }
+    
+    .logo {
+      position: absolute;
+      left: 20px;
+      top: 15px;
+      width: 80px;
+      height: 80px;
+    }
+    
+    .header-text {
+      margin-left: 100px;
+    }
+    
+    .header h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    
+    .header h4 {
+      margin: 2px 0;
+      font-size: 12px;
+      font-weight: normal;
+    }
+    
+    .title {
+      text-align: center;
+      background-color: #f0f0f0;
+      border-bottom: 2px solid #000;
+      padding: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .content {
+      padding: 15px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .info-table td {
+      padding: 5px;
+      vertical-align: top;
+    }
+    
+    .info-table .label {
+      width: 120px;
+      font-weight: normal;
+    }
+    
+    .info-table .colon {
+      width: 10px;
+    }
+    
+    .info-table .value {
+      font-weight: normal;
+    }
+    
+    .section {
+      margin-top: 15px;
+      border: 1px solid #000;
+      padding: 10px;
+    }
+    
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .disposisi-area {
+      min-height: 150px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    
+    .button-container {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+    }
+    
+    .btn {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 10px;
+    }
+    
+    .btn:hover {
+      background-color: #357ae8;
+    }
+    
+    .btn-secondary {
+      background-color: #666;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-container no-print">
+    <button class="btn" onclick="window.print()">🖨️ Print Disposisi</button>
+    <button class="btn btn-secondary" onclick="window.close()">✖ Tutup</button>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-text">
+        <h3>PEMERINTAH KABUPATEN PONOROGO</h3>
+        <h3>KECAMATAN SAWOO</h3>
+        <h4>Jalan Brojonoto Nomor 01, Sawoo, Ponorogo, Jawa Timur 63475</h4>
+        <h4>Telepon 0352-311008, Faksimile 0352-311008</h4>
+        <h4><strong>SAWOO</strong></h4>
+      </div>
+    </div>
+    
+    <!-- Title -->
+    <div class="title">
+      LEMBAR DISPOSISI
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+      <!-- Info Surat -->
+      <table class="info-table">
+        <tr>
+          <td class="label">Surat dari</td>
+          <td class="colon">:</td>
+          <td class="value"><?= surat.suratDari ?></td>
+          <td class="label">Diterima tanggal</td>
+          <td class="colon">:</td>
+          <td class="value"><?= diterimaTanggal ?></td>
+        </tr>
+        <tr>
+          <td class="label">No. Surat</td>
+          <td class="colon">:</td>
+          <td class="value"><?= surat.noSurat ?></td>
+          <td class="label">No. Agenda</td>
+          <td class="colon">:</td>
+          <td class="value"><?= surat.nomorAgenda ?></td>
+        </tr>
+        <tr>
+          <td class="label">Tangal Surat</td>
+          <td class="colon">:</td>
+          <td class="value"><?= tanggalSurat ?></td>
+          <td class="label">Sifat</td>
+          <td class="colon">:</td>
+          <td class="value"><?= surat.sifat ?></td>
+        </tr>
+        <tr>
+          <td class="label">Perihal</td>
+          <td class="colon">:</td>
+          <td class="value" colspan="4"><?= surat.perihal ?></td>
+        </tr>
+      </table>
+      
+      <!-- Diteruskan kepada -->
+      <div class="section">
+        <div class="section-title">Diteruskan kepada : 1.</div>
+        <div style="margin-left: 120px; margin-top: -20px;">2.</div>
+      </div>
+      
+      <!-- Isi Disposisi -->
+      <div class="section">
+        <div class="section-title">Isi Disposisi :</div>
+        <div class="disposisi-area">
+          <!-- Area kosong untuk ditulis tangan atau diketik -->
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Auto print saat halaman dibuka (optional)
+    // window.onload = function() {
+    //   setTimeout(function() {
+    //     window.print();
+    //   }, 500);
+    // };
+  </script>
+</body>
+</html>
